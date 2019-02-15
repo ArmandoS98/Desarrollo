@@ -86,19 +86,24 @@
 
             </LinearLayout>
         </LinearLayout>
-
-
     </LinearLayout>
 
 
     <EditText
+        android:hint="Introducir Valor"
         android:id="@+id/et_ingreso"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/lin_layout1"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="15dp"
-        android:layout_marginRight="15dp" />
+        android:layout_marginRight="15dp"
+        android:background="@drawable/edittext_effects"
+        android:maxLines="2"
+        android:maxLength="45"
+        android:padding="5dp"
+        android:textAlignment="center"
+        android:textSize="22sp" />
 
     <Button
         android:id="@+id/btn_operar"
@@ -107,7 +112,7 @@
         android:layout_below="@+id/et_ingreso"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:text="Operar" />
+        android:text="Calcular" />
 
     <TextView
         android:id="@+id/tv_resultado"

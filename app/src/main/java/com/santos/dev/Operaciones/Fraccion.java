@@ -35,6 +35,7 @@ public class Fraccion {
         return aux;
     }
 
+    //Grados
     public Fraccion Grados_a_Radianes(int numerador) {
         this.numerador = numerador;
         Fraccion aux = new Fraccion(numerador * 1, 180 * 1);
@@ -56,18 +57,20 @@ public class Fraccion {
         return aux;
     }
 
-    public Fraccion radianes_a_Grados(int numerador, int denominador){
+    //Radianes
+    public Fraccion radianes_a_Grados(int numerador, int denominador) {
         this.numerador = numerador;
         this.denominador = denominador;
-        if (denominador != 0) {
-            Fraccion aux = new Fraccion(numerador * 180, denominador * 1);
-            aux.mostrarFraccionSimplificada();
-            return aux;
+        Fraccion aux = new Fraccion(numerador * 180, denominador * 1);
+        aux.mostrarFraccionSimplificada();
+        return aux;
+       /* if (denominador != 0) {
+
         } else {
             Fraccion aux = new Fraccion(numerador * 180, 1 * 1);
             aux.mostrarFraccionSimplificada();
             return aux;
-        }
+        }*/
 
     }
     /*
@@ -98,7 +101,7 @@ public class Fraccion {
             } else
                 cont++;
 
-            System.out.println("Vueltas: " + cont);
+            System.out.println("Procesos: " + cont);
         }
         System.out.println("Fin");
     }

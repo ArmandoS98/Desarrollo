@@ -84,44 +84,75 @@ public class ConversionesFragment extends Fragment {
         mButtonOperar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //String currentString = mEditTextInput.getText().toString();
-                /* String[] separated = currentString.split("/");*/
-
                 if (posicion1 == 0 && posicion2 == 0) { //TODO COMIENZA GRADOS
                     mTextViewRespuesta.setText(mEditTextInput.getText().toString());
                 } else if (posicion1 == 0 && posicion2 == 1) {
                     mTextViewRespuesta.setText("Grados a Radianes");
-                    mTextViewRespuesta.setText(String.valueOf(fraccion.Grados_a_Radianes(Integer.parseInt(mEditTextInput.getText().toString())).toString(0)));
+                    if (mEditTextInput.getText().toString().equals("360")) {
+                        mTextViewRespuesta.setText("2 π radianes");
+                    } else if (mEditTextInput.getText().toString().equals("180")) {
+                        mTextViewRespuesta.setText("π radianes");
+                    } else
+                        mTextViewRespuesta.setText(String.valueOf(fraccion.Grados_a_Radianes(Integer.parseInt(mEditTextInput.getText().toString())).toString(0)));
                 } else if (posicion1 == 0 && posicion2 == 2) {
                     mTextViewRespuesta.setText("Grados a Rev");
-                    mTextViewRespuesta.setText(String.valueOf(fraccion.Grados_a_revoluciones(Integer.parseInt(mEditTextInput.getText().toString())).toString(1)));
+                    if (mEditTextInput.getText().toString().equals("360")) {
+                        mTextViewRespuesta.setText("1 rev");
+                    } else if (mEditTextInput.getText().toString().equals("180")) {
+                        mTextViewRespuesta.setText("1/2 rev.");
+                    } else
+                        mTextViewRespuesta.setText(String.valueOf(fraccion.Grados_a_revoluciones(Integer.parseInt(mEditTextInput.getText().toString())).toString(1)));
                 } else if (posicion1 == 0 && posicion2 == 3) {
                     mTextViewRespuesta.setText("Grados a Gon");
-                    mTextViewRespuesta.setText(String.valueOf(fraccion.Grados_a_gon(Integer.parseInt(mEditTextInput.getText().toString())).toString(2)));
+                    if (mEditTextInput.getText().toString().equals("360")) {
+                        mTextViewRespuesta.setText("400 gons");
+                    } else if (mEditTextInput.getText().toString().equals("180")) {
+                        mTextViewRespuesta.setText("200 gons.");
+                    } else
+                        mTextViewRespuesta.setText(String.valueOf(fraccion.Grados_a_gon(Integer.parseInt(mEditTextInput.getText().toString())).toString(2)));
                 } else if (posicion1 == 1 && posicion2 == 0) {//TODO COMIENZA RADIANES
                     mTextViewRespuesta.setText("Radianes a Grados");
                     String currentString = mEditTextInput.getText().toString();
                     String[] separated = currentString.split("/");
-                    if (separated.length >= 2) {
-                        mTextViewRespuesta.setText(String.valueOf(fraccion.radianes_a_Grados(Integer.parseInt(separated[0]), Integer.parseInt(separated[1])).toString(3)));
+                    if (mEditTextInput.getText().toString().equals("2") && mEditTextInput.getText().toString().equals("2/1")) {
+                        mTextViewRespuesta.setText("360");
+                    } else if (mEditTextInput.getText().toString().equals("1") && mEditTextInput.getText().toString().equals("1/1")) {
+                        mTextViewRespuesta.setText("180.");
                     } else {
-                        mTextViewRespuesta.setText(String.valueOf(fraccion.radianes_a_Grados(Integer.parseInt(separated[0]), 1).toString(3)));
+                        if (separated.length >= 2) {
+                            mTextViewRespuesta.setText(String.valueOf(fraccion.radianes_a_Grados(Integer.parseInt(separated[0]), Integer.parseInt(separated[1])).toString(3)));
+                        } else {
+                            mTextViewRespuesta.setText(String.valueOf(fraccion.radianes_a_Grados(Integer.parseInt(separated[0]), 1).toString(3)));
+                        }
                     }
-
                 } else if (posicion1 == 1 && posicion2 == 1) {
                     mTextViewRespuesta.setText(mEditTextInput.getText().toString());
                 } else if (posicion1 == 1 && posicion2 == 2) {
                     mTextViewRespuesta.setText("Radianes a Rev");
+                    if (mEditTextInput.getText().toString().equals("2") || mEditTextInput.getText().toString().equals("2/1")) {
+                        mTextViewRespuesta.setText("1 rev");
+                    } else if (mEditTextInput.getText().toString().equals("1") || mEditTextInput.getText().toString().equals("1/1")) {
+                        mTextViewRespuesta.setText("1/2 rev.");
+                    } else {
+                        //Codigo de la nueva operacion
+                    }
                 } else if (posicion1 == 1 && posicion2 == 3) {
                     mTextViewRespuesta.setText("Radianes a Gon");
-                } else if (posicion1 == 2 && posicion2 == 0) {
-                    mTextViewRespuesta.setText("Rev a Grados");//TODO COMIENZA REV
+                    if (mEditTextInput.getText().toString().equals("2") || mEditTextInput.getText().toString().equals("2/1")) {
+                        mTextViewRespuesta.setText("400 gons.");
+                    } else if (mEditTextInput.getText().toString().equals("1") || mEditTextInput.getText().toString().equals("1/1")) {
+                        mTextViewRespuesta.setText("200 gons.");
+                    } else {
+                        //Codigo de la nueva operacion
+                    }
+                } else if (posicion1 == 2 && posicion2 == 0) {//TODO COMIENZA REV
+                    mTextViewRespuesta.setText("Rev a Grados");
                 } else if (posicion1 == 2 && posicion2 == 1) {
                     mTextViewRespuesta.setText("Rev a Radianes");
                 } else if (posicion1 == 2 && posicion2 == 2) {
                     mTextViewRespuesta.setText(mEditTextInput.getText().toString());
-                } else if (posicion1 == 2 && posicion2 == 3) {
-                    mTextViewRespuesta.setText("Radianes a Gon");//TODO COMIENZA GON
+                } else if (posicion1 == 2 && posicion2 == 3) {//TODO COMIENZA GON
+                    mTextViewRespuesta.setText("Radianes a Gon");
                 } else if (posicion1 == 3 && posicion2 == 0) {
                     mTextViewRespuesta.setText("Gon a Grados");
                 } else if (posicion1 == 3 && posicion2 == 1) {
