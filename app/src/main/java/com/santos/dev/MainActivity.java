@@ -1,6 +1,9 @@
 package com.santos.dev;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,15 +18,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.santos.dev.Opciones.ConversionesFragment;
 import com.santos.dev.Opciones.FormulasFragment;
+import com.santos.dev.Utils.FirebaseMethods;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Fragment fragmentoGenerico = null;
+    //FirebaseMethods
+    private FirebaseMethods firebaseMethods;
+    private Dialog epicDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +43,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        epicDialog = new Dialog(this);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -92,6 +105,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            showTheNewDialog(R.style.DialogScale);
+            //mAdaptadorMaestrosCompleto.notifyDataSetChanged();
             return true;
         }
 
@@ -135,6 +150,64 @@ public class MainActivity extends AppCompatActivity
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(R.id.contenedor, fragmentoGenerico, fragmentoGenerico.getTag()).commit();
         }
+    }
+
+    private void showTheNewDialog(int type) {
+
+        //Inicializacion de nuestros metodos
+        firebaseMethods = new FirebaseMethods(this, "Notas");
+        epicDialog.setContentView(R.layout.popup_alumnos);
+        epicDialog.getWindow().getAttributes().windowAnimations = type;
+
+        //Widgets
+        final ImageView closePopupPositiveImg = epicDialog.findViewById(R.id.closePopupPositive);
+        final Button aceptar = epicDialog.findViewById(R.id.btn_acept);
+        final EditText mEditTextTitulo = epicDialog.findViewById(R.id.note_title);
+        final EditText mEditTextApellidos = epicDialog.findViewById(R.id.tidt_apellido);
+        final EditText mEditTextEdad = epicDialog.findViewById(R.id.tiet_edad);
+
+        closePopupPositiveImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                epicDialog.dismiss();
+            }
+        });
+
+
+        aceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Todo: obtenemos los valores de las vistas corresponidnetes
+                String nombre = mEditTextTitulo.getText().toString();
+                String apellidos = mEditTextApellidos.getText().toString();
+                String edad = mEditTextEdad.getText().toString();
+
+                if (checkInputs(nombre, apellidos, edad)) {
+                    crearNuevoAlumno(nombre, apellidos, edad);
+                    epicDialog.dismiss();
+                }
+            }
+        });
+
+        epicDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        epicDialog.show();
+    }
+
+    private boolean checkInputs(String nombres, String apellidos, String edad) {
+        if (nombres.equals("") || apellidos.equals("") || edad.equals("")) {
+            Toast.makeText(this, "Todos los compos son obligatorios", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void crearNuevoAlumno(String nombre, String apellidos, String edad) {
+        //firebaseMethods.registrarNuevoEmail(correo,"123456789");
+        firebaseMethods.nuevaNota(
+                nombre,
+                apellidos,
+                edad);
     }
 
 }
