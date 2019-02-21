@@ -103,6 +103,7 @@ public class FirebaseMethods {
         nota.setUserName(datos[3]);
         nota.setUserPhoto(datos[4]);
         nota.setUserEmail(datos[5]);
+        nota.setId_user_settings(datos[7]);
 
         newNoteRef.set(nota).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

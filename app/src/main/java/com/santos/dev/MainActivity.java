@@ -302,7 +302,8 @@ public class MainActivity extends AppCompatActivity
                 firebaseUser.getDisplayName(),
                 firebaseUser.getPhotoUrl().toString(),
                 firebaseUser.getEmail(),
-                url_imagen);
+                url_imagen,
+                firebaseUser.getUid());
     }
 
     @Override

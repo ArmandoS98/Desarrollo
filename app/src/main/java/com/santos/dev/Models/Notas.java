@@ -13,8 +13,7 @@ public class Notas implements Parcelable {
 
     private String tituloNota;
     private String descripcionNota;
-    private @ServerTimestamp
-    Date timestamp;
+    private @ServerTimestamp Date timestamp;
     private String nombreTemaNota;
     private String url_foto;
     private String idNota;
@@ -22,11 +21,12 @@ public class Notas implements Parcelable {
     private String userName;
     private String userPhoto;
     private String userEmail;
+    private String id_user_settings;
 
     public Notas() {
     }
 
-    public Notas(String tituloNota, String descripcionNota, Date timestamp, String nombreTemaNota, String url_foto, String idNota, String key, String userName, String userPhoto, String userEmail) {
+    public Notas(String tituloNota, String descripcionNota, Date timestamp, String nombreTemaNota, String url_foto, String idNota, String key, String userName, String userPhoto, String userEmail, String id_user_settings) {
         this.tituloNota = tituloNota;
         this.descripcionNota = descripcionNota;
         this.timestamp = timestamp;
@@ -37,6 +37,7 @@ public class Notas implements Parcelable {
         this.userName = userName;
         this.userPhoto = userPhoto;
         this.userEmail = userEmail;
+        this.id_user_settings = id_user_settings;
     }
 
     protected Notas(Parcel in) {
@@ -49,6 +50,7 @@ public class Notas implements Parcelable {
         userName = in.readString();
         userPhoto = in.readString();
         userEmail = in.readString();
+        id_user_settings = in.readString();
     }
 
     public static final Creator<Notas> CREATOR = new Creator<Notas>() {
@@ -143,6 +145,14 @@ public class Notas implements Parcelable {
         this.userEmail = userEmail;
     }
 
+    public String getId_user_settings() {
+        return id_user_settings;
+    }
+
+    public void setId_user_settings(String id_user_settings) {
+        this.id_user_settings = id_user_settings;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -159,6 +169,7 @@ public class Notas implements Parcelable {
         dest.writeString(userName);
         dest.writeString(userPhoto);
         dest.writeString(userEmail);
+        dest.writeString(id_user_settings);
     }
 
     @Override
@@ -174,6 +185,7 @@ public class Notas implements Parcelable {
                 ", userName='" + userName + '\'' +
                 ", userPhoto='" + userPhoto + '\'' +
                 ", userEmail='" + userEmail + '\'' +
+                ", id_user_settings='" + id_user_settings + '\'' +
                 '}';
     }
 }
