@@ -1,6 +1,9 @@
 package com.santos.dev;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, IMainMaestro,
         GoogleApiClient.OnConnectionFailedListener {
 
+    public static final String FOTO1 = "https://firebasestorage.googleapis.com/v0/b/trigonometria-1c5cb.appspot.com/o/Imagenes%2Fnoimage.png?alt=media&token=1e1df63e-25ef-42b0-8520-3cd0992799c3";
     private static final int GalleriaPick = 1;
     private static final String TAG = "MainActivity";
     public static final String KEY_NOTAS = "Valor";
@@ -193,7 +197,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_gallery) {
             fragmentoGenerico = new ConversionesFragment();
         } else if (id == R.id.nav_slideshow) {
-
+            Toast.makeText(this, "Esta opcion esta en desarrollo", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_manage) {
+            openWhatsApp();
         }
 
         if (fragmentoGenerico != null) {
@@ -227,6 +233,7 @@ public class MainActivity extends AppCompatActivity
         firebaseMethods = new FirebaseMethods(this, "Notas");
         epicDialog.setContentView(R.layout.popup_alumnos);
         epicDialog.getWindow().getAttributes().windowAnimations = type;
+        epicDialog.setCancelable(false);
 
         //Widgets
         final ImageView closePopupPositiveImg = epicDialog.findViewById(R.id.closePopupPositive);
@@ -264,6 +271,9 @@ public class MainActivity extends AppCompatActivity
                 String edad = mEditTextEdad.getText().toString();
 
                 if (checkInputs(nombre, apellidos, edad)) {
+                    if (url_imagen == null)
+                        url_imagen = FOTO1;
+
                     crearNuevoAlumno(nombre, apellidos, edad);
                     epicDialog.dismiss();
                 }
@@ -302,7 +312,7 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra(KEY_NOTAS, notas);
         SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
         String date = spf.format(notas.getTimestamp());
-        intent.putExtra("date",date);
+        intent.putExtra("date", date);
         startActivity(intent);
     }
 
@@ -364,5 +374,19 @@ public class MainActivity extends AppCompatActivity
                         }
                     });
         }
+    }
+
+    private void openWhatsApp() {
+        String smsNumber = "50253266952"; // E164 format without '+' sign
+        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        sendIntent.setType("text/plain");
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "Feddback -> ");
+        sendIntent.putExtra("jid", smsNumber + "@s.whatsapp.net"); //phone number without "+" prefix
+        sendIntent.setPackage("com.whatsapp");
+        /*if (intent.resolveActivity(getActivity().getPackageManager()) == null) {
+            Toast.makeText(this, "Error/n" + e.toString(), Toast.LENGTH_SHORT).show();
+            return;
+        }*/
+        startActivity(sendIntent);
     }
 }
