@@ -5,19 +5,19 @@
 
     <item
         android:id="@+id/nav_camera"
-        android:icon="@drawable/ic_menu_camera"
+        android:icon="@drawable/ic_estudio"
         android:title="Estudio" />
     <item
         android:id="@+id/nav_gallery"
-        android:icon="@drawable/ic_menu_gallery"
+        android:icon="@drawable/ic_conversiones"
         android:title="Conversiones" />
     <item
         android:id="@+id/nav_slideshow"
-        android:icon="@drawable/ic_menu_slideshow"
+        android:icon="@drawable/ic_ejemplos"
         android:title="Ejemplos" />
     <item
         android:id="@+id/nav_manage"
-        android:icon="@drawable/ic_menu_manage"
-        android:title="Mas" />
+        android:icon="@drawable/ic_feedback"
+        android:title="Feedbacks" />
 
 </menu>

@@ -65,9 +65,15 @@ public class AdaptadorNotas extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     .apply(options)
                     .into(((ViewHolder) holder).mImageView);
 
+            Glide.with(mContext)
+                    .load(alumnos.get(position).getUserPhoto())
+                    .apply(options)
+                    .into(((ViewHolder) holder).mCircleImageViewPerfil);
+
             //obtenemos su nombre
             ((ViewHolder) holder).mTextViewNombre.setText(alumnos.get(position).getTituloNota());
-            ((ViewHolder) holder).mteTextViewDescripcion.setText(alumnos.get(position).getDescripcionNota());
+            //((ViewHolder) holder).mteTextViewDescripcion.setText(alumnos.get(position).getDescripcionNota());
+            ((ViewHolder) holder).mTextViewNombreUser.setText(alumnos.get(position).getUserName());
         }
     }
 
@@ -102,7 +108,7 @@ public class AdaptadorNotas extends RecyclerView.Adapter<RecyclerView.ViewHolder
             mTextViewNombre = itemView.findViewById(R.id.tv_nombre_usuario);
             mTextViewNombreUser = itemView.findViewById(R.id.tv_persona_name);
             mteTextViewDescripcion = itemView.findViewById(R.id.tv_descripcion);
-            frameLayout = itemView.findViewById(R.id.cadr_elements);
+            //frameLayout = itemView.findViewById(R.id.cadr_elements);
 
             itemView.setOnClickListener(this);
         }

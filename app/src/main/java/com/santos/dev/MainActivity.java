@@ -4,8 +4,10 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -32,13 +34,25 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Interfaz.IMainMaestro;
 import com.santos.dev.Models.Notas;
 import com.santos.dev.Opciones.ConversionesFragment;
 import com.santos.dev.Opciones.FormulasFragment;
 import com.santos.dev.Utils.FirebaseMethods;
+
+import java.text.SimpleDateFormat;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -46,7 +60,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, IMainMaestro,
         GoogleApiClient.OnConnectionFailedListener {
 
+    private static final int GalleriaPick = 1;
     private static final String TAG = "MainActivity";
+    public static final String KEY_NOTAS = "Valor";
     private Fragment fragmentoGenerico = null;
     //FirebaseMethods
     private FirebaseMethods firebaseMethods;
@@ -56,6 +72,11 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAuth.AuthStateListener mAuthListener;
     private GoogleApiClient mGoogleApiClient;
     private FirebaseUser firebaseUser;
+    private FirebaseFirestore db;
+    private Uri mImageUri;
+    private String url_imagen;
+    private StorageReference mStorageReference;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,14 +95,14 @@ public class MainActivity extends AppCompatActivity
                 .build();
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -210,6 +231,7 @@ public class MainActivity extends AppCompatActivity
         //Widgets
         final ImageView closePopupPositiveImg = epicDialog.findViewById(R.id.closePopupPositive);
         final Button aceptar = epicDialog.findViewById(R.id.btn_acept);
+        final Button mButtonFoto = epicDialog.findViewById(R.id.btn_foto);
         final EditText mEditTextTitulo = epicDialog.findViewById(R.id.note_title);
         final EditText mEditTextApellidos = epicDialog.findViewById(R.id.tidt_apellido);
         final EditText mEditTextEdad = epicDialog.findViewById(R.id.tiet_edad);
@@ -221,6 +243,17 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        mStorageReference = FirebaseStorage.getInstance().getReference("Imagenes");
+
+        mButtonFoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent galeriaIntent = new Intent();
+                galeriaIntent.setAction(Intent.ACTION_GET_CONTENT);
+                galeriaIntent.setType("image/*");
+                startActivityForResult(galeriaIntent, GalleriaPick);
+            }
+        });
 
         aceptar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -255,16 +288,81 @@ public class MainActivity extends AppCompatActivity
         firebaseMethods.nuevaNota(
                 nombre,
                 apellidos,
-                edad);
+                edad,
+                firebaseUser.getDisplayName(),
+                firebaseUser.getPhotoUrl().toString(),
+                firebaseUser.getEmail(),
+                url_imagen);
     }
 
     @Override
     public void onNotaSeleccionada(Notas notas) {
         Log.d(TAG, "onNotaSeleccionada: Nota" + notas);
+        Intent intent = new Intent(this, ShowActivity.class);
+        intent.putExtra(KEY_NOTAS, notas);
+        SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
+        String date = spf.format(notas.getTimestamp());
+        intent.putExtra("date",date);
+        startActivity(intent);
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GalleriaPick && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+            mImageUri = data.getData();
+
+            StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ firebaseUser.getUid() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
+
+
+            Toast.makeText(this, "Actualizando!", Toast.LENGTH_LONG).show();
+            fileReference.putFile(mImageUri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            url_imagen = taskSnapshot.getDownloadUrl().toString();
+                            Toast.makeText(MainActivity.this, "Foto Subida", Toast.LENGTH_SHORT).show();
+                            //mWaveLoadingView.setProgress(0);
+
+                           /* DocumentReference noteRef = db.collection("Notas")
+                                    .document(user_ID);
+
+                            noteRef.update(
+                                    "url_foto", taskSnapshot.getDownloadUrl().toString()
+                            ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(getApplicationContext(), "Fotografia Actualizada...", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Error.", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });*/
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            Toast.makeText(getApplicationContext(), "Error al momento de subir la foto!", Toast.LENGTH_SHORT).show();
+
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                            //mWaveLoadingView.setProgress((int) progress);
+                        }
+                    });
+        }
     }
 }
