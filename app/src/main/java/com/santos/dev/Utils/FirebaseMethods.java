@@ -98,6 +98,8 @@ public class FirebaseMethods {
         nota.setDescripcionNota(datos[1]);
         nota.setNombreTemaNota(datos[2]);
         nota.setUrl_foto(FOTO);
+        nota.setIdNota(newNoteRef.getId());
+        nota.setKey("1");
 
         newNoteRef.set(nota).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

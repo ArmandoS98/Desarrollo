@@ -2,29 +2,58 @@ package com.santos.dev.Opciones;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.santos.dev.Adapters.AdaptadorFormulasG;
+import com.santos.dev.Adapters.AdaptadorNotas;
 import com.santos.dev.Adapters.AdapterFormulasN;
 import com.santos.dev.Conversiones;
 import com.santos.dev.FormulaG;
+import com.santos.dev.Models.Notas;
 import com.santos.dev.Operaciones.Fraccion;
 import com.santos.dev.R;
+import com.santos.dev.Utils.FirebaseMethods;
 
 import java.util.ArrayList;
 
+import javax.annotation.Nullable;
+
 
 public class FormulasFragment extends Fragment {
+    private static final String TAG = "FormulasFragment";
+    public static final String NOTAS_DATABASE = "Notas";
     private RecyclerView mRecyclerViewHoirzaontal;
     private RecyclerView mRecyclerViewConverciones;
     private ArrayList<FormulaG> mFormulaGS;
     private ArrayList<Conversiones> mConversiones;
+    //FirebaseMethods
+    private RecyclerView recyclergenerico;
+
+    //Variables
+    private ArrayList<Notas> alumnos = new ArrayList<>();
+    private DocumentSnapshot mLastQueriedDocument;
+    private FirebaseMethods firebaseMethods;
+    private AdaptadorNotas mAdaptadorNotas;
 
     public FormulasFragment() {
         // Required empty public constructor
@@ -43,7 +72,11 @@ public class FormulasFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_formulas, container, false);
-        Fraccion fraccion = new Fraccion(30, 1);
+        recyclergenerico = view.findViewById(R.id.recyclergenerico);
+
+        getAlumnos();
+        initRecyclerView();
+        /*Fraccion fraccion = new Fraccion(30, 1);
         Fraccion fraccion1 = new Fraccion(1, 180);
         TextView textView = view.findViewById(R.id.textview_title);
         //textView.setText(fraccion.Grados_a_gon().toString(2));
@@ -59,8 +92,77 @@ public class FormulasFragment extends Fragment {
         AdaptadorFormulasG adaptadorFormulasG = new AdaptadorFormulasG(getContext(), mFormulaGS);
         AdapterFormulasN adapterFormulasN = new AdapterFormulasN(getContext(), mConversiones);
         mRecyclerViewHoirzaontal.setAdapter(adaptadorFormulasG);
-        mRecyclerViewConverciones.setAdapter(adapterFormulasN);
+        mRecyclerViewConverciones.setAdapter(adapterFormulasN);*/
         return view;
+    }
+
+    FirebaseFirestore db;
+    CollectionReference notesCollectionRef;
+
+    private void getAlumnos() {
+        db = FirebaseFirestore.getInstance();
+
+        notesCollectionRef = db.collection(NOTAS_DATABASE);
+
+        Query notesQuery = null;
+        if (mLastQueriedDocument != null) {
+            notesQuery = notesCollectionRef
+                    .whereEqualTo("key", "1")
+                    .startAfter(mLastQueriedDocument);
+        } else {
+            notesQuery = notesCollectionRef
+                    .whereEqualTo("key", "1");
+        }
+
+
+        notesQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+
+                    //mImageViewNoHayTasks.setVisibility(View.GONE);
+                    //mTextViewNoHayTasks.setVisibility(View.GONE);
+
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Notas alumno = document.toObject(Notas.class);
+                        alumnos.add(alumno);
+                    }
+
+                    /*if (alumnos.size() == 0) {
+                        mTextViewNoDatos.setVisibility(View.VISIBLE);
+                    }*/
+
+                    if (task.getResult().size() != 0) {
+                        mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
+                    }
+
+                    //imagenanimada.setVisibility(View.GONE);
+
+                    //rotateloading.stop();
+                    //imagenanimada.pauseAnimation();
+                    //imagenanimada.setVisibility(View.GONE);
+                    mAdaptadorNotas.notifyDataSetChanged();
+                    //runAnimation(mRecyclerView,0);
+                } else {
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
+
+    //Este metodo inicia el recycler view con sus componentes
+    private void initRecyclerView() {
+        if (mAdaptadorNotas == null) {
+            mAdaptadorNotas = new AdaptadorNotas(getContext(), alumnos);
+        }
+
+        recyclergenerico.setLayoutManager(new LinearLayoutManager(getContext()));
+
+
+        //StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayout.VERTICAL);
+
+        recyclergenerico.setAdapter(mAdaptadorNotas);
     }
 
     private void getInfo() {
@@ -76,5 +178,51 @@ public class FormulasFragment extends Fragment {
         mFormulaGS.add(new FormulaG("π radianes", "π radianes"));
         mFormulaGS.add(new FormulaG("Centigrados", "180°"));
         mFormulaGS.add(new FormulaG("GON", "200"));
+    }
+
+
+    @Override
+    public void onStart() {
+        db.collection(NOTAS_DATABASE)
+                .whereEqualTo("key", "1")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.d(TAG, "onEvent: llego");
+                            return;
+                        }
+
+
+                        if (alumnos.size() == 0) {
+                            alumnos.clear();
+                        } else {
+                            alumnos.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Notas grado = doc.toObject(Notas.class);
+                                alumnos.add(grado);
+                            }
+
+                            /*if (alumnos.size() == 0) {
+                                mTextViewNoDatos.setVisibility(View.VISIBLE);
+                            } else {
+                                mTextViewNoDatos.setVisibility(View.GONE);
+                            }*/
+
+                        }
+
+                        mAdaptadorNotas.notifyDataSetChanged();
+                    }
+                });
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+       /* if (listenerRegistration != null) {
+            listenerRegistration.remove();
+        }*/
+        super.onStop();
     }
 }

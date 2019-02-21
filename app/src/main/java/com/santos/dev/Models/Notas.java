@@ -16,16 +16,20 @@ public class Notas implements Parcelable {
     private @ServerTimestamp Date timestamp;
     private String nombreTemaNota;
     private String url_foto;
+    private String idNota;
+    private String key;
 
     public Notas() {
     }
 
-    public Notas(String tituloNota, String descripcionNota, Date timestamp, String nombreTemaNota, String url_foto) {
+    public Notas(String tituloNota, String descripcionNota, Date timestamp, String nombreTemaNota, String url_foto, String idNota, String key) {
         this.tituloNota = tituloNota;
         this.descripcionNota = descripcionNota;
         this.timestamp = timestamp;
         this.nombreTemaNota = nombreTemaNota;
         this.url_foto = url_foto;
+        this.idNota = idNota;
+        this.key = key;
     }
 
     protected Notas(Parcel in) {
@@ -33,6 +37,8 @@ public class Notas implements Parcelable {
         descripcionNota = in.readString();
         nombreTemaNota = in.readString();
         url_foto = in.readString();
+        idNota = in.readString();
+        key = in.readString();
     }
 
     public static final Creator<Notas> CREATOR = new Creator<Notas>() {
@@ -87,6 +93,35 @@ public class Notas implements Parcelable {
         this.url_foto = url_foto;
     }
 
+    public String getIdNota() {
+        return idNota;
+    }
+
+    public void setIdNota(String idNota) {
+        this.idNota = idNota;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    @Override
+    public String toString() {
+        return "Notas{" +
+                "tituloNota='" + tituloNota + '\'' +
+                ", descripcionNota='" + descripcionNota + '\'' +
+                ", timestamp=" + timestamp +
+                ", nombreTemaNota='" + nombreTemaNota + '\'' +
+                ", url_foto='" + url_foto + '\'' +
+                ", idNota='" + idNota + '\'' +
+                ", key='" + key + '\'' +
+                '}';
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -98,16 +133,7 @@ public class Notas implements Parcelable {
         dest.writeString(descripcionNota);
         dest.writeString(nombreTemaNota);
         dest.writeString(url_foto);
-    }
-
-    @Override
-    public String toString() {
-        return "Notas{" +
-                "tituloNota='" + tituloNota + '\'' +
-                ", descripcionNota='" + descripcionNota + '\'' +
-                ", timestamp=" + timestamp +
-                ", nombreTemaNota='" + nombreTemaNota + '\'' +
-                ", url_foto='" + url_foto + '\'' +
-                '}';
+        dest.writeString(idNota);
+        dest.writeString(key);
     }
 }

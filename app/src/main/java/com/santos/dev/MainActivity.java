@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -23,19 +25,37 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.santos.dev.Interfaz.IMainMaestro;
+import com.santos.dev.Models.Notas;
 import com.santos.dev.Opciones.ConversionesFragment;
 import com.santos.dev.Opciones.FormulasFragment;
 import com.santos.dev.Utils.FirebaseMethods;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import de.hdodenhof.circleimageview.CircleImageView;
 
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, IMainMaestro,
+        GoogleApiClient.OnConnectionFailedListener {
+
+    private static final String TAG = "MainActivity";
     private Fragment fragmentoGenerico = null;
     //FirebaseMethods
     private FirebaseMethods firebaseMethods;
     private Dialog epicDialog;
+
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private GoogleApiClient mGoogleApiClient;
+    private FirebaseUser firebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +64,15 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         epicDialog = new Dialog(this);
+
+        mAuth = FirebaseAuth.getInstance();
+        firebaseUser = mAuth.getCurrentUser();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API)
+                .build();
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -61,6 +90,25 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        //TODO: Verificacion si el usuario esta logeado.
+        if (firebaseUser != null) {
+
+            //TODO: ESTO PERMITE CAMBIARLE EL TEXTO EN EL ENCABEZADO
+
+            View hView = navigationView.getHeaderView(0);
+            final TextView nav_user = hView.findViewById(R.id.tv_nombre);
+            final CircleImageView profile = hView.findViewById(R.id.imageView);
+
+            nav_user.setText(firebaseUser.getDisplayName());
+
+            if (firebaseUser.getPhotoUrl() != null) {
+                Glide.with(this).load(firebaseUser.getPhotoUrl()).into(profile);
+            }
+        } else {
+            firebaseUser = null;
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
         //TODO: AQUI MANDAMOS A MOSTRAR EL FRAGMENTO CUANDO SE INICIA LA ACTIVIDAD
         if (navigationView != null) {
             //    prepararDrawer(navigationView);
@@ -210,4 +258,13 @@ public class MainActivity extends AppCompatActivity
                 edad);
     }
 
+    @Override
+    public void onNotaSeleccionada(Notas notas) {
+        Log.d(TAG, "onNotaSeleccionada: Nota" + notas);
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d(TAG, "onConnectionFailed:" + connectionResult);
+    }
 }

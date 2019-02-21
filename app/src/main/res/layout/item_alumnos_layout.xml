@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cadr_elements"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
+
+
+        <RelativeLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/lin_layout_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:orientation="horizontal"
+                android:weightSum="3">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/img_user"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="0.5"
+                    android:src="@mipmap/ic_launcher" />
+
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_persona_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="11dp"
+                        android:gravity="center_vertical"
+                        android:text="Nombre persona"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+
+                    <TextView
+                        android:id="@+id/tv_nombre_usuario"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="11dp"
+                        android:text="Armando Santos"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="19sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lin_layout_header"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp">
+
+                <ImageView
+                    android:id="@+id/img_ejercicio"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:maxHeight="180dp"
+                    android:src="@drawable/radianes" />
+
+                <!-- <de.hdodenhof.circleimageview.CircleImageView
+                     android:id="@+id/img_maestro_preview"
+                     android:layout_width="100dp"
+                     android:layout_height="100dp"
+                     android:layout_marginBottom="15dp"
+                     android:layout_marginLeft="40dp"
+                     android:layout_marginTop="15dp"
+                     android:src="@mipmap/ic_launcher" />-->
+
+                <TextView
+                    android:id="@+id/tv_descripcion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/img_ejercicio"
+                    android:layout_centerVertical="true"
+                    android:text="Armando Santos"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="19sp"
+                    android:textStyle="italic" />
+
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/tv_descripcion"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@android:color/black" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
+
+
+    <!--<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/img_maestro_preview"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginBottom="15dp"
+                android:layout_weight="1.2"
+                android:src="@mipmap/ic_launcher"/>
+
+            <RelativeLayout
+                android:layout_weight="2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_nombre_usuario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Armando Santos"
+                    android:textStyle="bold"
+                    android:textSize="19sp"
+                    android:textColor="@color/colorPrimaryDark"/>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
+
+</RelativeLayout>
+<!-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:foreground="?android:attr/selectableItemBackground">
+
+<android.support.v7.widget.CardView
+    android:id="@+id/cadr_elements"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="3">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/img_maestro_preview"
+            android:layout_marginTop="15dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="90dp"
+            android:elevation="8dp"
+            android:src="@drawable/ic_launcher_background"
+            android:layout_gravity="center_vertical"/>
+
+        <TextView
+            android:id="@+id/tv_nombre_usuario"
+            android:layout_marginTop="8dp"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="Armando Santos"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginBottom="15dp"
+            android:textColor="@android:color/black"/>
+
+    </LinearLayout>--><!--</android.support.v7.widget.CardView>-->

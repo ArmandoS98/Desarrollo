@@ -6,7 +6,7 @@
     <item
         android:id="@+id/nav_camera"
         android:icon="@drawable/ic_menu_camera"
-        android:title="Formulas" />
+        android:title="Estudio" />
     <item
         android:id="@+id/nav_gallery"
         android:icon="@drawable/ic_menu_gallery"
