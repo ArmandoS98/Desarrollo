@@ -22,6 +22,15 @@
                 android:layout_height="match_parent"
                 android:clickable="true"
                 android:orientation="vertical" />
+
+            <com.victor.loading.rotate.RotateLoading
+                android:id="@+id/rotateloading"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"
+                app:loading_color="@color/colorPrimaryDark"
+                app:loading_width="5dp" />
+
         </RelativeLayout>
 
         <!-- <android.support.design.widget.FloatingActionButton

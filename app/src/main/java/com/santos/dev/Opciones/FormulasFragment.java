@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.RotateAnimation;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ import com.santos.dev.Models.Notas;
 import com.santos.dev.Operaciones.Fraccion;
 import com.santos.dev.R;
 import com.santos.dev.Utils.FirebaseMethods;
+import com.victor.loading.rotate.RotateLoading;
 
 import java.util.ArrayList;
 
@@ -54,6 +56,8 @@ public class FormulasFragment extends Fragment {
     private DocumentSnapshot mLastQueriedDocument;
     private FirebaseMethods firebaseMethods;
     private AdaptadorNotas mAdaptadorNotas;
+    private RotateLoading mRotateLoading;
+
 
     public FormulasFragment() {
         // Required empty public constructor
@@ -73,6 +77,9 @@ public class FormulasFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_formulas, container, false);
         recyclergenerico = view.findViewById(R.id.recyclergenerico);
+        mRotateLoading = view.findViewById(R.id.rotateloading);
+
+        mRotateLoading.start();
 
         getAlumnos();
         initRecyclerView();
@@ -138,7 +145,7 @@ public class FormulasFragment extends Fragment {
 
                     //imagenanimada.setVisibility(View.GONE);
 
-                    //rotateloading.stop();
+                    mRotateLoading.stop();
                     //imagenanimada.pauseAnimation();
                     //imagenanimada.setVisibility(View.GONE);
                     mAdaptadorNotas.notifyDataSetChanged();

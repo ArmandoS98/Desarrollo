@@ -377,16 +377,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void openWhatsApp() {
-        String smsNumber = "50253266952"; // E164 format without '+' sign
-        Intent sendIntent = new Intent(Intent.ACTION_SEND);
-        sendIntent.setType("text/plain");
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "Feddback -> ");
-        sendIntent.putExtra("jid", smsNumber + "@s.whatsapp.net"); //phone number without "+" prefix
-        sendIntent.setPackage("com.whatsapp");
-        /*if (intent.resolveActivity(getActivity().getPackageManager()) == null) {
-            Toast.makeText(this, "Error/n" + e.toString(), Toast.LENGTH_SHORT).show();
-            return;
-        }*/
-        startActivity(sendIntent);
+        try {
+            String smsNumber = "50253266952"; // E164 format without '+' sign
+            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+            sendIntent.setType("text/plain");
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "Feedback -> ");
+            sendIntent.putExtra("jid", smsNumber + "@s.whatsapp.net"); //phone number without "+" prefix
+            sendIntent.setPackage("com.whatsapp");
+            if (sendIntent.resolveActivity(getApplicationContext().getPackageManager()) == null) {
+                Log.d(TAG, "openWhatsApp: Error");
+                return;
+            }
+            if (sendIntent != null)
+                startActivity(sendIntent);
+            else
+                Toast.makeText(this, "Verificar", Toast.LENGTH_SHORT).show();
+        }catch (Exception e){
+            Log.d(TAG, "openWhatsApp: error" + e.getMessage());
+        }
     }
 }
