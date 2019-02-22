@@ -1,6 +1,6 @@
 package com.santos.dev;
 
-public class Conversiones {
+public class  Conversiones {
     private String titulo;
     private String ejercicio;
     private int imagen;

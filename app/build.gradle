@@ -10,6 +10,8 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        vectorDrawables.useSupportLibrary = true
+
 
     }
     buildTypes {
@@ -48,7 +50,6 @@ dependencies {
 
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.github.bumptech.glide:glide:4.8.0'
-    //
     implementation 'com.victor:lib:1.0.4'
 
 }

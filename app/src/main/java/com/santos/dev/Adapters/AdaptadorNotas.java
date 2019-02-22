@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.santos.dev.Interfaz.IMainMaestro;
 import com.santos.dev.Models.Notas;
 import com.santos.dev.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -39,12 +41,7 @@ public class AdaptadorNotas extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder holder;
-        int layout = 0;
-
-        layout = R.layout.item_alumnos_layout;
-
-
-        View itemView = LayoutInflater.from(mContext).inflate(layout, parent, false);
+        View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_alumnos_layout, parent, false);
         holder = new ViewHolder(itemView);
         return holder;
     }
@@ -52,6 +49,7 @@ public class AdaptadorNotas extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof ViewHolder) {
+
             //obtenemos la foto de perfil
             RequestOptions options = new RequestOptions()
                     .centerCrop()
@@ -70,10 +68,13 @@ public class AdaptadorNotas extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     .apply(options)
                     .into(((ViewHolder) holder).mCircleImageViewPerfil);
 
-            //obtenemos su nombre
-            ((ViewHolder) holder).mTextViewNombre.setText(alumnos.get(position).getTituloNota());
-            //((ViewHolder) holder).mteTextViewDescripcion.setText(alumnos.get(position).getDescripcionNota());
-            ((ViewHolder) holder).mTextViewNombreUser.setText(alumnos.get(position).getUserName());
+            ((ViewHolder) holder).mteTextViewDescripcion.setText(alumnos.get(position).getDescripcionNota());
+            ((ViewHolder) holder).mTextViewTitulo.setText(alumnos.get(position).getTituloNota());
+            if (alumnos.get(position).getTimestamp() != null) {
+                SimpleDateFormat spf = new SimpleDateFormat("MMM dd");
+                String date = spf.format(alumnos.get(position).getTimestamp());
+                ((ViewHolder) holder).mTextViewFecha.setText(date);
+            }
         }
     }
 
@@ -91,25 +92,18 @@ public class AdaptadorNotas extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private CircleImageView mCircleImageViewPerfil;
         private ImageView mImageView;
-        private TextView mTextViewNombre;
-        private TextView mTextViewNombreUser;
+        private TextView mTextViewTitulo;
         private TextView mteTextViewDescripcion;
-        private ActionMode maActionMode;
-        private boolean multiSelect = false;
-        private CardView frameLayout;
-        int p;
-        private ArrayList<Integer> selectedItems = new ArrayList<Integer>();
+        private TextView mTextViewFecha;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             mImageView = itemView.findViewById(R.id.img_ejercicio);
             mCircleImageViewPerfil = itemView.findViewById(R.id.img_user);
-            mTextViewNombre = itemView.findViewById(R.id.tv_nombre_usuario);
-            mTextViewNombreUser = itemView.findViewById(R.id.tv_persona_name);
+            mTextViewTitulo = itemView.findViewById(R.id.titleTextView);
             mteTextViewDescripcion = itemView.findViewById(R.id.tv_descripcion);
-            //frameLayout = itemView.findViewById(R.id.cadr_elements);
-
+            mTextViewFecha = itemView.findViewById(R.id.dateTextView);
             itemView.setOnClickListener(this);
         }
 
@@ -126,4 +120,5 @@ public class AdaptadorNotas extends RecyclerView.Adapter<RecyclerView.ViewHolder
         alumnos.addAll(newLista);
         notifyDataSetChanged();
     }
+
 }

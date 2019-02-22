@@ -13,8 +13,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewCompat;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -314,6 +316,7 @@ public class MainActivity extends AppCompatActivity
         SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
         String date = spf.format(notas.getTimestamp());
         intent.putExtra("date", date);
+
         startActivity(intent);
     }
 
