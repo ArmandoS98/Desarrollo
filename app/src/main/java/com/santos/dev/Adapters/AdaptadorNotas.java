@@ -76,6 +76,7 @@ public class AdaptadorNotas extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 ((ViewHolder) holder).mTextViewFecha.setText(date);
             }
         }
+        
     }
 
     @Override

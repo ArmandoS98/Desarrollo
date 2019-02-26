@@ -7,5 +7,5 @@ import com.santos.dev.Models.Notas;
 
 public interface IMainMaestro {
     void onNotaSeleccionada(Notas notas);
-
+    void onNotaUpdate(Notas notas);
 }

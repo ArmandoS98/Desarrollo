@@ -1,9 +1,6 @@
 package com.santos.dev;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -11,12 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewCompat;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -27,8 +20,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -39,15 +30,12 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnPausedListener;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -58,6 +46,9 @@ import com.santos.dev.Opciones.FormulasFragment;
 import com.santos.dev.Utils.FirebaseMethods;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -321,6 +312,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onNotaUpdate(Notas notas) {
+        // no es indespesable aqui
+    }
+
+    @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
@@ -332,52 +328,73 @@ public class MainActivity extends AppCompatActivity
                 && data != null && data.getData() != null) {
             mImageUri = data.getData();
 
-            StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ firebaseUser.getUid() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
 
+            StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
 
-            Toast.makeText(this, "Actualizando!", Toast.LENGTH_LONG).show();
-            fileReference.putFile(mImageUri)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                            url_imagen = taskSnapshot.getDownloadUrl().toString();
-                            Toast.makeText(MainActivity.this, "Foto Subida", Toast.LENGTH_SHORT).show();
-                            //mWaveLoadingView.setProgress(0);
-
-                           /* DocumentReference noteRef = db.collection("Notas")
-                                    .document(user_ID);
-
-                            noteRef.update(
-                                    "url_foto", taskSnapshot.getDownloadUrl().toString()
-                            ).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(getApplicationContext(), "Fotografia Actualizada...", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "Error.", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });*/
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                            Toast.makeText(getApplicationContext(), "Error al momento de subir la foto!", Toast.LENGTH_SHORT).show();
-
-                        }
-                    })
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                            //mWaveLoadingView.setProgress((int) progress);
-                        }
-                    });
+            fileReference.putFile(mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    url_imagen = taskSnapshot.getDownloadUrl().toString();
+                    Toast.makeText(MainActivity.this, "Foto Subida", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                    System.out.println("Upload is paused");
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    System.out.println("Upload is " + progress + "% done");
+                }
+            });
         }
+    }
+
+    private String getDate() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE dd MMMM yyyy  HH:mm:ss", Locale.getDefault());
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // If there's an upload in progress, save the reference so you can query it later
+        if (mStorageReference != null) {
+            outState.putString("reference", mStorageReference.toString());
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // If there was an upload in progress, get its reference and create a new StorageReference
+        final String stringRef = savedInstanceState.getString("reference");
+        if (stringRef == null) {
+            return;
+        }
+
+        mStorageReference = FirebaseStorage.getInstance().getReferenceFromUrl(stringRef);
+
+        // Find all UploadTasks under this StorageReference (in this example, there should be one)
+        List<UploadTask> tasks = mStorageReference.getActiveUploadTasks();
+        if (tasks.size() > 0) {
+            // Get the task monitoring the upload
+            UploadTask task = tasks.get(0);
+
+            // Add new listeners to the task using an Activity scope
+            task.addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot state) {
+                    Toast.makeText(MainActivity.this, "Subida correcta!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
     }
 
     private void openWhatsApp() {
@@ -396,7 +413,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(sendIntent);
             else
                 Toast.makeText(this, "Verificar", Toast.LENGTH_SHORT).show();
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.d(TAG, "openWhatsApp: error" + e.getMessage());
         }
     }

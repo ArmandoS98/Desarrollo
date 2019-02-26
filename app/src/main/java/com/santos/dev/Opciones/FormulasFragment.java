@@ -4,15 +4,12 @@ package com.santos.dev.Opciones;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.RotateAnimation;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -25,13 +22,10 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.santos.dev.Adapters.AdaptadorFormulasG;
 import com.santos.dev.Adapters.AdaptadorNotas;
-import com.santos.dev.Adapters.AdapterFormulasN;
 import com.santos.dev.Conversiones;
 import com.santos.dev.FormulaG;
 import com.santos.dev.Models.Notas;
-import com.santos.dev.Operaciones.Fraccion;
 import com.santos.dev.R;
 import com.santos.dev.Utils.FirebaseMethods;
 import com.victor.loading.rotate.RotateLoading;
@@ -39,6 +33,10 @@ import com.victor.loading.rotate.RotateLoading;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
+
+import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
+import static com.santos.dev.Utils.Nodos.PARAMETRO_KEY;
+import static com.santos.dev.Utils.Nodos.PARAMETRO_VALOR;
 
 
 public class FormulasFragment extends Fragment {
@@ -187,11 +185,11 @@ public class FormulasFragment extends Fragment {
         mFormulaGS.add(new FormulaG("GON", "200"));
     }
 
-
     @Override
-    public void onStart() {
-        db.collection(NOTAS_DATABASE)
-                .whereEqualTo("key", "1")
+    public void onResume() {
+        super.onResume();
+        db.collection(NODO_NOTAS)
+                .whereEqualTo(PARAMETRO_KEY, PARAMETRO_VALOR)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
@@ -222,6 +220,11 @@ public class FormulasFragment extends Fragment {
                         mAdaptadorNotas.notifyDataSetChanged();
                     }
                 });
+    }
+
+    @Override
+    public void onStart() {
+
         super.onStart();
     }
 
