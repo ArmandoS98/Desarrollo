@@ -1,4 +1,4 @@
-package com.santos.dev.Opciones;
+package com.santos.dev.UI;
 
 
 import android.os.Bundle;
@@ -23,8 +23,8 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.santos.dev.Adapters.AdaptadorNotas;
-import com.santos.dev.Conversiones;
-import com.santos.dev.FormulaG;
+import com.santos.dev.Models.Conversiones;
+import com.santos.dev.Models.FormulaG;
 import com.santos.dev.Models.Notas;
 import com.santos.dev.R;
 import com.santos.dev.Utils.FirebaseMethods;

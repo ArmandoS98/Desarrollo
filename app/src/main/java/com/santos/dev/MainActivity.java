@@ -40,9 +40,14 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Interfaz.IMainMaestro;
+import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
-import com.santos.dev.Opciones.ConversionesFragment;
-import com.santos.dev.Opciones.FormulasFragment;
+import com.santos.dev.UI.Activities.ShowActivity;
+import com.santos.dev.UI.Activities.TabActivity;
+import com.santos.dev.UI.ConversionesFragment;
+import com.santos.dev.UI.FormulasFragment;
+import com.santos.dev.UI.Activities.NuevoCursooActivity;
+import com.santos.dev.UI.CursosFragment;
 import com.santos.dev.Utils.FirebaseMethods;
 
 import java.text.SimpleDateFormat;
@@ -51,6 +56,8 @@ import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, IMainMaestro,
@@ -132,7 +139,8 @@ public class MainActivity extends AppCompatActivity
             //    prepararDrawer(navigationView);
             //Seleccionar item por defecto
             setTitle(navigationView.getMenu().getItem(0).getTitle());
-            fragmentoGenerico = new FormulasFragment();
+            fragmentoGenerico = new CursosFragment();
+            //fragmentoGenerico = new FormulasFragment();
             getSupportFragmentManager().beginTransaction().add(R.id.contenedor, fragmentoGenerico).commit();
         }
         navigationView.setNavigationItemSelectedListener(this);
@@ -171,7 +179,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            showTheNewDialog(R.style.DialogScale);
+            startActivity(new Intent(getApplicationContext(), NuevoCursooActivity.class));
+            //showTheNewDialog(R.style.DialogScale);
             //mAdaptadorMaestrosCompleto.notifyDataSetChanged();
             return true;
         }
@@ -186,7 +195,8 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         if (id == R.id.nav_camera) {
-            fragmentoGenerico = new FormulasFragment();
+            fragmentoGenerico = new CursosFragment();
+            //fragmentoGenerico = new FormulasFragment();
         } else if (id == R.id.nav_gallery) {
             fragmentoGenerico = new ConversionesFragment();
         } else if (id == R.id.nav_slideshow) {
@@ -223,7 +233,7 @@ public class MainActivity extends AppCompatActivity
     private void showTheNewDialog(int type) {
 
         //Inicializacion de nuestros metodos
-        firebaseMethods = new FirebaseMethods(this, "Notas");
+        firebaseMethods = new FirebaseMethods(this, NODO_NOTAS);
         epicDialog.setContentView(R.layout.popup_alumnos);
         epicDialog.getWindow().getAttributes().windowAnimations = type;
         epicDialog.setCancelable(false);
@@ -301,19 +311,24 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onNotaSeleccionada(Notas notas) {
-        Log.d(TAG, "onNotaSeleccionada: Nota" + notas);
-        Intent intent = new Intent(this, ShowActivity.class);
-        intent.putExtra(KEY_NOTAS, notas);
-        SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
-        String date = spf.format(notas.getTimestamp());
-        intent.putExtra("date", date);
 
-        startActivity(intent);
     }
 
     @Override
     public void onNotaUpdate(Notas notas) {
         // no es indespesable aqui
+    }
+
+    @Override
+    public void onCursotoNotaa(Cursos cursos) {
+        Log.d(TAG, "onCursotoNotaa: Curso: " + cursos);
+        Intent intent = new Intent(this, TabActivity.class);
+        intent.putExtra(KEY_NOTAS, cursos);
+        SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
+        String date = spf.format(cursos.getTimestamp());
+        intent.putExtra("date", date);
+
+        startActivity(intent);
     }
 
     @Override

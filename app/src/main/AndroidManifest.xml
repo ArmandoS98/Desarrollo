@@ -14,10 +14,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ShowActivity"></activity>
+        <activity android:name=".UI.Activities.TabActivity"></activity>
+        <activity android:name=".UI.Activities.NuevoCursooActivity" />
+        <activity android:name=".UI.Activities.ShowActivity" />
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login"></activity>
+            android:label="@string/title_activity_login" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

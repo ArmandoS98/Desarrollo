@@ -13,11 +13,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static com.santos.dev.Utils.Nodos.SUB_COLLECTION_CURSOS;
 
 public class FirebaseMethods {
     private static final String TAG = "FirebaseMethods";
@@ -87,7 +90,30 @@ public class FirebaseMethods {
 
     //Todo: Incerciones en la DB
 
+    public void nuevoCurso(String... datos) {
+        Cursos cursos = new Cursos();
+        cursos.setNombre_curso(datos[0]);
+        cursos.setDescripcion_curso(datos[1]);
+        cursos.setUrl_foto(datos[2]);
+        cursos.setId_curso(newNoteRef.getId());
+        cursos.setKey(datos[3]);
+        cursos.setId_user_settings(datos[4]);
+
+        newNoteRef.set(cursos).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful())
+                    Toast.makeText(mContext, "Curso Creado", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(mContext, "Error", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void nuevaNota(String... datos) {
+
+        //newNoteRef = db.collection(nodo).document("hi").collection("maiz").document();
+
         Notas nota = new Notas();
         nota.setTituloNota(datos[0]);
         nota.setDescripcionNota(datos[1]);

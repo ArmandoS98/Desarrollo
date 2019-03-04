@@ -1,7 +1,12 @@
 package com.santos.dev.Utils;
 
 public class Nodos {
+    //Collections
     public static final String NODO_NOTAS = "Notas";
+    public static final String NODO_CURSOS = "Cursos";
+
+    //Sub-Collections
+    public static final String SUB_COLLECTION_CURSOS = "Cursos";
 
     //Parametro whereEqualTo (Este metodo nos ayuda a buscar sientos datos dentro de la DB)
     public static final String PARAMETRO_KEY = "key";

@@ -1,4 +1,4 @@
-package com.santos.dev;
+package com.santos.dev.UI.Activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +33,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.StorageReference;
 import com.santos.dev.Dialogs.Dialog_FullScreen;
 import com.santos.dev.Interfaz.IMainMaestro;
+import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
+import com.santos.dev.R;
 
 import javax.annotation.Nullable;
 
@@ -210,6 +211,11 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
                 }
             }
         });
+    }
+
+    @Override
+    public void onCursotoNotaa(Cursos cursos) {
+
     }
 
     @Override

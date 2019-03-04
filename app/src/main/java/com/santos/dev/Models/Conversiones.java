@@ -1,4 +1,4 @@
-package com.santos.dev;
+package com.santos.dev.Models;
 
 public class  Conversiones {
     private String titulo;

@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
-import com.santos.dev.Conversiones;
+import com.santos.dev.Models.Conversiones;
 import com.santos.dev.R;
 
 import java.util.ArrayList;

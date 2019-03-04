@@ -1,4 +1,4 @@
-package com.santos.dev;
+package com.santos.dev.Models;
 
 public class FormulaG {
     private String titulo;
