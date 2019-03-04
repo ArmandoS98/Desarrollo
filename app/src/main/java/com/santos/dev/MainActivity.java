@@ -20,9 +20,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,9 +37,9 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Interfaz.IMainMaestro;
+import com.santos.dev.Models.Cuestionario;
 import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
-import com.santos.dev.UI.Activities.ShowActivity;
 import com.santos.dev.UI.Activities.TabActivity;
 import com.santos.dev.UI.ConversionesFragment;
 import com.santos.dev.UI.FormulasFragment;
@@ -63,8 +60,6 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, IMainMaestro,
         GoogleApiClient.OnConnectionFailedListener {
 
-    public static final String FOTO1 = "https://firebasestorage.googleapis.com/v0/b/trigonometria-1c5cb.appspot.com/o/Imagenes%2Fnoimage.png?alt=media&token=1e1df63e-25ef-42b0-8520-3cd0992799c3";
-    private static final int GalleriaPick = 1;
     private static final String TAG = "MainActivity";
     public static final String KEY_NOTAS = "Valor";
     private Fragment fragmentoGenerico = null;
@@ -78,7 +73,6 @@ public class MainActivity extends AppCompatActivity
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
     private Uri mImageUri;
-    private String url_imagen;
     private StorageReference mStorageReference;
 
 
@@ -88,7 +82,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        epicDialog = new Dialog(this);
+
 
         mAuth = FirebaseAuth.getInstance();
         firebaseUser = mAuth.getCurrentUser();
@@ -180,8 +174,7 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             startActivity(new Intent(getApplicationContext(), NuevoCursooActivity.class));
-            //showTheNewDialog(R.style.DialogScale);
-            //mAdaptadorMaestrosCompleto.notifyDataSetChanged();
+
             return true;
         }
 
@@ -230,85 +223,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void showTheNewDialog(int type) {
-
-        //Inicializacion de nuestros metodos
-        firebaseMethods = new FirebaseMethods(this, NODO_NOTAS);
-        epicDialog.setContentView(R.layout.popup_alumnos);
-        epicDialog.getWindow().getAttributes().windowAnimations = type;
-        epicDialog.setCancelable(false);
-
-        //Widgets
-        final ImageView closePopupPositiveImg = epicDialog.findViewById(R.id.closePopupPositive);
-        final Button aceptar = epicDialog.findViewById(R.id.btn_acept);
-        final Button mButtonFoto = epicDialog.findViewById(R.id.btn_foto);
-        final EditText mEditTextTitulo = epicDialog.findViewById(R.id.note_title);
-        final EditText mEditTextApellidos = epicDialog.findViewById(R.id.tidt_apellido);
-        final EditText mEditTextEdad = epicDialog.findViewById(R.id.tiet_edad);
-
-        closePopupPositiveImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                epicDialog.dismiss();
-            }
-        });
-
-        mStorageReference = FirebaseStorage.getInstance().getReference("Imagenes");
-
-        mButtonFoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent galeriaIntent = new Intent();
-                galeriaIntent.setAction(Intent.ACTION_GET_CONTENT);
-                galeriaIntent.setType("image/*");
-                startActivityForResult(galeriaIntent, GalleriaPick);
-            }
-        });
-
-        aceptar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Todo: obtenemos los valores de las vistas corresponidnetes
-                String nombre = mEditTextTitulo.getText().toString();
-                String apellidos = mEditTextApellidos.getText().toString();
-                String edad = mEditTextEdad.getText().toString();
-
-                if (checkInputs(nombre, apellidos, edad)) {
-                    if (url_imagen == null)
-                        url_imagen = FOTO1;
-
-                    crearNuevoAlumno(nombre, apellidos, edad);
-                    epicDialog.dismiss();
-                }
-            }
-        });
-
-        epicDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        epicDialog.show();
-    }
-
-    private boolean checkInputs(String nombres, String apellidos, String edad) {
-        if (nombres.equals("") || apellidos.equals("") || edad.equals("")) {
-            Toast.makeText(this, "Todos los compos son obligatorios", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        return true;
-    }
-
-    private void crearNuevoAlumno(String nombre, String apellidos, String edad) {
-        //firebaseMethods.registrarNuevoEmail(correo,"123456789");
-        firebaseMethods.nuevaNota(
-                nombre,
-                apellidos,
-                edad,
-                firebaseUser.getDisplayName(),
-                firebaseUser.getPhotoUrl().toString(),
-                firebaseUser.getEmail(),
-                url_imagen,
-                firebaseUser.getUid());
-    }
-
     @Override
     public void onNotaSeleccionada(Notas notas) {
 
@@ -332,45 +246,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
+    public void onNuevoCuestionario(String titulo, String content) {
+
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GalleriaPick && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
-            mImageUri = data.getData();
-
-
-            StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
-
-            fileReference.putFile(mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    url_imagen = taskSnapshot.getDownloadUrl().toString();
-                    Toast.makeText(MainActivity.this, "Foto Subida", Toast.LENGTH_SHORT).show();
-                }
-            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
-                    System.out.println("Upload is paused");
-                }
-            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                    System.out.println("Upload is " + progress + "% done");
-                }
-            });
-        }
-    }
-
-    private String getDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE dd MMMM yyyy  HH:mm:ss", Locale.getDefault());
-        Date date = new Date();
-        return dateFormat.format(date);
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
     @Override

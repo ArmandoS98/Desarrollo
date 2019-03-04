@@ -4,6 +4,7 @@ public class Nodos {
     //Collections
     public static final String NODO_NOTAS = "Notas";
     public static final String NODO_CURSOS = "Cursos";
+    public static final String NODO_CUESTIONARIO = "Cuestionario";
 
     //Sub-Collections
     public static final String SUB_COLLECTION_CURSOS = "Cursos";
@@ -21,4 +22,7 @@ public class Nodos {
 
     //VALIDACION DEL USUARIO PARA EDITAR INFORMACION
     public static final String IDENTIFICADOR_USUARIO = "id_user_settings";
+
+    //VAR PARA NUESTROS INTENTES
+    public static final String KEY ="dato";
 }

@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.santos.dev.Models.Cuestionario;
 import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
 
@@ -20,6 +21,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static com.santos.dev.Utils.Nodos.NODO_CUESTIONARIO;
+import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
+import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
 import static com.santos.dev.Utils.Nodos.SUB_COLLECTION_CURSOS;
 
 public class FirebaseMethods {
@@ -35,6 +39,21 @@ public class FirebaseMethods {
 
     private String userID;
     private Context mContext;
+
+    public FirebaseMethods(Context context, String... args) {
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        //args(0) = nodo
+        //args(1) = id documetno o para este caso nodo de cursos
+        //args(2) = nodo de la subcollecion
+        newNoteRef = db.collection(args[0]).document(args[1]).collection(args[2]).document();
+        mContext = context;
+
+        if (mAuth.getCurrentUser() != null) {
+            userID = mAuth.getCurrentUser().getUid();
+        }
+
+    }
 
     public FirebaseMethods(Context context) {
         mAuth = FirebaseAuth.getInstance();
@@ -131,6 +150,30 @@ public class FirebaseMethods {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(mContext, "Nota Creada", Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void nuevoCuestionario(String... datos) {
+        //datos(0) = id del curso
+        //datos(1) = id de la tarea
+        //datos(2) = pregunta
+        //datos(3) = respuesta
+        newNoteRef = db.collection(NODO_CURSOS).document(datos[0]).collection(NODO_NOTAS).document(datos[1]).collection(NODO_CUESTIONARIO).document();
+
+        Cuestionario cuestionario = new Cuestionario();
+        cuestionario.setId_cuestionario(newNoteRef.getId());
+        cuestionario.setId_nota(datos[1]);
+        cuestionario.setPregunta(datos[2]);
+        cuestionario.setRespuesta_txt(datos[3]);
+
+        newNoteRef.set(cuestionario).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(mContext, "Cuestionario Creado", Toast.LENGTH_SHORT).show();
                 } else
                     Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
             }

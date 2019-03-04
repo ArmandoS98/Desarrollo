@@ -6,4 +6,9 @@
         android:orderInCategory="100"
         android:title="Nueva Nota"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_color"
+        android:orderInCategory="100"
+        android:title="Aplicar Color"
+        app:showAsAction="never" />
 </menu>

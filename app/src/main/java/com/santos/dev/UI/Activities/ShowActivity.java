@@ -9,6 +9,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -24,23 +26,37 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.StorageReference;
+import com.santos.dev.Adapters.AdaptadorCuestionario;
+import com.santos.dev.Adapters.AdaptadorNotas;
 import com.santos.dev.Dialogs.Dialog_FullScreen;
+import com.santos.dev.Dialogs.Dialog_FullScreen_Cuestionario;
 import com.santos.dev.Interfaz.IMainMaestro;
+import com.santos.dev.Models.Cuestionario;
 import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
 import com.santos.dev.R;
+import com.santos.dev.Utils.FirebaseMethods;
+
+import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
 import static com.santos.dev.MainActivity.KEY_NOTAS;
+import static com.santos.dev.UI.Activities.TabActivity.id_docuento;
 import static com.santos.dev.Utils.Nodos.CONTENIDO_NOTA;
+import static com.santos.dev.Utils.Nodos.KEY;
+import static com.santos.dev.Utils.Nodos.NODO_CUESTIONARIO;
+import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
 import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
 import static com.santos.dev.Utils.Nodos.PARAMETRO_ID_NOTA;
 import static com.santos.dev.Utils.Nodos.TITULO_NOTA;
@@ -56,11 +72,19 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
 
     private static final int GalleriaPick = 1;
     private FirebaseFirestore db;
+    private DocumentSnapshot mLastQueriedDocument;
     private FirebaseAuth mAuth;
     private Uri mImageUri;
     private String id_nota;
+    public static String curso_id;
     private String nombre_nota;
     private StorageReference mStorageReference;
+    Notas mNote = null;
+    private FirebaseMethods mFirebaseMethods;
+
+    private RecyclerView mRecyclerView;
+    private AdaptadorCuestionario mAdaptadorCuestionario;
+    private ArrayList<Cuestionario> cuestionarios;
 
     //private FirebaseMethods firebaseMethods;
 
@@ -71,8 +95,8 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        mFirebaseMethods = new FirebaseMethods(this);
 
-        Notas mNote = null;
         Intent i = getIntent();
         mNote = i.getParcelableExtra(KEY_NOTAS);
 
@@ -99,6 +123,17 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
             mButtonEditarNota = findViewById(R.id.tv_editar_nota);
             mButtonElimnarNota = findViewById(R.id.tv_eliminar_nota);
             mFloatingActionButton = findViewById(R.id.fab);
+
+            String date = getIntent().getStringExtra("date");
+            curso_id = getIntent().getStringExtra(KEY);
+            mTextViewFecha.setText(date);
+            id_nota = mNote.getIdNota();
+
+            mRecyclerView = findViewById(R.id.recyclergenerico);
+            mRecyclerView.setHasFixedSize(true);
+            cuestionarios = new ArrayList<>();
+            getAlumnos(id_nota);
+            initRecyclerView();
 
             if (mNote.getId_user_settings().equals(mAuth.getUid())) {
                 mButtonEditarNota.setVisibility(View.VISIBLE);
@@ -180,10 +215,71 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
 
             mTextViewDescripcion.setText(mNote.getDescripcionNota());
 
-            String date = getIntent().getStringExtra("date");
-            mTextViewFecha.setText(date);
-            id_nota = mNote.getIdNota();
         }
+    }
+
+    //Este metodo inicia el recycler view con sus componentes
+    private void initRecyclerView() {
+        if (mAdaptadorCuestionario == null) {
+            mAdaptadorCuestionario = new AdaptadorCuestionario(this, cuestionarios);
+        }
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        //StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayout.VERTICAL);
+        mRecyclerView.setAdapter(mAdaptadorCuestionario);
+    }
+
+
+    private void getAlumnos(String id_notas) {
+        db = FirebaseFirestore.getInstance();
+
+        CollectionReference notesCollectionRef = db.collection(NODO_CURSOS).document(curso_id).collection(NODO_NOTAS).document(id_nota).collection(NODO_CUESTIONARIO);
+
+        Query notesQuery = null;
+        if (mLastQueriedDocument != null) {
+            notesQuery = notesCollectionRef
+                    .whereEqualTo("id_nota", id_nota)
+                    .startAfter(mLastQueriedDocument);
+        } else {
+            notesQuery = notesCollectionRef
+                    .whereEqualTo("id_nota", id_nota);
+        }
+
+
+        notesQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+
+                    //mImageViewNoHayTasks.setVisibility(View.GONE);
+                    //mTextViewNoHayTasks.setVisibility(View.GONE);
+
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Cuestionario _cuestionario = document.toObject(Cuestionario.class);
+                        cuestionarios.add(_cuestionario);
+                    }
+
+                    /*if (alumnos.size() == 0) {
+                        mTextViewNoDatos.setVisibility(View.VISIBLE);
+                    }*/
+
+                    if (task.getResult().size() != 0) {
+                        mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
+                    }
+
+                    //imagenanimada.setVisibility(View.GONE);
+
+                    //mRotateLoading.stop();
+                    //imagenanimada.pauseAnimation();
+                    //imagenanimada.setVisibility(View.GONE);
+                    mAdaptadorCuestionario.notifyDataSetChanged();
+                    //runAnimation(mRecyclerView,0);
+                } else {
+                    Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
     private void loadBackdrop(String url_foto) {
@@ -198,7 +294,7 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
 
     @Override
     public void onNotaUpdate(Notas notas) {
-        DocumentReference noteref = db.collection(NODO_NOTAS).document(notas.getIdNota());
+        DocumentReference noteref = db.collection(NODO_CURSOS).document(curso_id).collection(NODO_NOTAS).document(notas.getIdNota());
         noteref.update(TITULO_NOTA, notas.getTituloNota(),
                 CONTENIDO_NOTA, notas.getDescripcionNota()
         ).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -219,9 +315,14 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
     }
 
     @Override
+    public void onNuevoCuestionario(String titulo, String content) {
+        mFirebaseMethods.nuevoCuestionario(curso_id, id_nota, titulo, content);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        db.collection(NODO_NOTAS)
+        db.collection(NODO_CURSOS).document(curso_id).collection(NODO_NOTAS)
                 .whereEqualTo(PARAMETRO_ID_NOTA, id_nota)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -284,6 +385,10 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
             intent.putExtra(Intent.EXTRA_TEXT, mTextViewDescripcion.getText().toString());
             startActivity(Intent.createChooser(intent, "Share with"));
             return true;
+        } else if (id == R.id.preguntas) {
+            Dialog_FullScreen_Cuestionario dialog_fullScreen = Dialog_FullScreen_Cuestionario.newInstance(mNote);
+            dialog_fullScreen.setCancelable(false);
+            dialog_fullScreen.show(getSupportFragmentManager(), "Cuestionario");
         }
         return super.onOptionsItemSelected(item);
     }

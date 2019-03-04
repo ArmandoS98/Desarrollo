@@ -1,5 +1,6 @@
 package com.santos.dev.UI.Activities;
 
+import android.print.PrinterId;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -7,6 +8,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.santos.dev.R;
 import com.santos.dev.Utils.FirebaseMethods;
 
@@ -17,11 +20,16 @@ public class NuevoCursooActivity extends AppCompatActivity {
     private EditText mEditTextTitulo;
     private EditText mEditTextContenido;
     private TextView mButtonGuardar;
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nuevo_cursoo);
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
         mEditTextTitulo = findViewById(R.id.et_titulo);
         mEditTextContenido = findViewById(R.id.et_descripcion);
@@ -37,7 +45,7 @@ public class NuevoCursooActivity extends AppCompatActivity {
 
     private void getSaveCurso(String... args) {
         FirebaseMethods firebaseMethods = new FirebaseMethods(this,NODO_CURSOS);
-        firebaseMethods.nuevoCurso(args[0], args[1],"foto","1","yo");
+        firebaseMethods.nuevoCurso(args[0], args[1],"foto","1",mFirebaseUser.getUid());
         finish();
     }
 }

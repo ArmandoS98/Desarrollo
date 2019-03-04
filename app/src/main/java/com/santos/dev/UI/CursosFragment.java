@@ -6,14 +6,18 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -46,6 +50,8 @@ public class CursosFragment extends Fragment {
     private FirebaseMethods firebaseMethods;
     private RotateLoading mRotateLoading;
     private AdaptadorCursos mAdaptadorNotas;
+    private FirebaseAuth mAuth;
+    private FirebaseUser mFirebaseUser;
 
     public CursosFragment() {
         // Required empty public constructor
@@ -83,14 +89,17 @@ public class CursosFragment extends Fragment {
 
         notesCollectionRef = db.collection(NODO_CURSOS);
 
+        mAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mAuth.getCurrentUser();
+
         Query notesQuery = null;
         if (mLastQueriedDocument != null) {
             notesQuery = notesCollectionRef
-                    .whereEqualTo("key", "1")
+                    .whereEqualTo("id_user_settings", mFirebaseUser.getUid())
                     .startAfter(mLastQueriedDocument);
         } else {
             notesQuery = notesCollectionRef
-                    .whereEqualTo("key", "1");
+                    .whereEqualTo("id_user_settings", mFirebaseUser.getUid());
         }
 
 
@@ -136,11 +145,8 @@ public class CursosFragment extends Fragment {
             mAdaptadorNotas = new AdaptadorCursos(getContext(), mCursos);
         }
 
-        mRecyclerViewConverciones.setLayoutManager(new LinearLayoutManager(getContext()));
-
-
-        //StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayout.VERTICAL);
-
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayout.VERTICAL);
+        mRecyclerViewConverciones.setLayoutManager(layoutManager);
         mRecyclerViewConverciones.setAdapter(mAdaptadorNotas);
     }
 
@@ -148,7 +154,7 @@ public class CursosFragment extends Fragment {
     public void onResume() {
         super.onResume();
         db.collection(NODO_CURSOS)
-                .whereEqualTo(PARAMETRO_KEY, PARAMETRO_VALOR)
+                .whereEqualTo("id_user_settings", mFirebaseUser.getUid())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,

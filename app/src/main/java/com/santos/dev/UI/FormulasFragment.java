@@ -34,6 +34,8 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import static com.santos.dev.UI.Activities.TabActivity.id_docuento;
+import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
 import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
 import static com.santos.dev.Utils.Nodos.PARAMETRO_KEY;
 import static com.santos.dev.Utils.Nodos.PARAMETRO_VALOR;
@@ -107,7 +109,7 @@ public class FormulasFragment extends Fragment {
     private void getAlumnos() {
         db = FirebaseFirestore.getInstance();
 
-        notesCollectionRef = db.collection(NOTAS_DATABASE);
+        notesCollectionRef = db.collection(NODO_CURSOS).document(id_docuento).collection(NODO_NOTAS);
 
         Query notesQuery = null;
         if (mLastQueriedDocument != null) {
@@ -188,7 +190,7 @@ public class FormulasFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        db.collection(NODO_NOTAS)
+        db.collection(NODO_CURSOS).document(id_docuento).collection(NODO_NOTAS)
                 .whereEqualTo(PARAMETRO_KEY, PARAMETRO_VALOR)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
