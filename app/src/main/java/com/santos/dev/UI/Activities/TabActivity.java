@@ -1,10 +1,12 @@
 package com.santos.dev.UI.Activities;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
@@ -13,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -26,9 +29,12 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnPausedListener;
@@ -41,6 +47,7 @@ import com.santos.dev.Models.Cuestionario;
 import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
 import com.santos.dev.R;
+import com.santos.dev.UI.CompartidosFragment;
 import com.santos.dev.UI.FormulasFragment;
 import com.santos.dev.Utils.FirebaseMethods;
 
@@ -84,6 +91,7 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
     public static String id_docuento;
 
     private int currentColor;
+    private Cursos cursos = null;
 
 
     @Override
@@ -96,8 +104,6 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         firebaseUser = mAuth.getCurrentUser();
         currentColor = ContextCompat.getColor(this, R.color.colorAccent);
 
-
-        Cursos cursos = null;
         Intent i = getIntent();
         cursos = i.getParcelableExtra(KEY_NOTAS);
 
@@ -170,7 +176,7 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         tabTareasFragment.setArguments(bundle);*/
         //adapter.addFrag(tabTareasFragment, "Notas");
         adapter.addFrag(new FormulasFragment(), "Notas");
-        adapter.addFrag(new FormulasFragment(), "Compatidos");
+        adapter.addFrag(new CompartidosFragment(), "Compatidos");
         viewPager.setAdapter(adapter);
     }
 
@@ -248,10 +254,58 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
             //showTheNewDialog(R.style.DialogScale);
             //mAdaptadorMaestrosCompleto.notifyDataSetChanged();
             return true;
-        }else if (id == R.id.action_color){
+        } else if (id == R.id.action_color) {
             openDialog(true);
+        } else if (id == R.id.action_delete_curso) {
+            getDeleteGrado();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void getDeleteGrado() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(TabActivity.this);
+
+        builder.setTitle("Confirmar");
+        builder.setMessage("Esta seguro de eliminar este curso?");
+
+        builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                // Do nothing but close the dialog
+                db = FirebaseFirestore.getInstance();
+
+                DocumentReference noteRef = db
+                        .collection(NODO_CURSOS)
+                        .document(cursos.getId_curso());
+
+                noteRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(TabActivity.this, "Curso Eliminado", Toast.LENGTH_SHORT).show();
+                            //mNoteRecyclerViewAdapter.removeNote(note);
+                        } else {
+                            Toast.makeText(TabActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                dialog.dismiss();
+                TabActivity.this.finish();
+            }
+        });
+
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                // Do nothing
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void openDialog(boolean supportsAlpha) {
@@ -269,10 +323,11 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         });
         dialog.show();
     }
+
     private void showTheNewDialog(int type) {
 
         //Inicializacion de nuestros metodos
-        firebaseMethods = new FirebaseMethods(this, NODO_CURSOS, id_docuento,NODO_NOTAS);
+        firebaseMethods = new FirebaseMethods(this, NODO_CURSOS, id_docuento, NODO_NOTAS);
         epicDialog.setContentView(R.layout.popup_alumnos);
         epicDialog.getWindow().getAttributes().windowAnimations = type;
         epicDialog.setCancelable(false);
@@ -349,7 +404,6 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
                 url_imagen,
                 firebaseUser.getUid());
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

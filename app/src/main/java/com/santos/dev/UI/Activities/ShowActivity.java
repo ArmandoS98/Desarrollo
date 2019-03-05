@@ -64,29 +64,26 @@ import static com.santos.dev.Utils.Nodos.TITULO_NOTA;
 public class ShowActivity extends AppCompatActivity implements IMainMaestro {
     private static final String TAG = "ShowActivity";
 
+    private FirebaseFirestore db;
+    private DocumentSnapshot mLastQueriedDocument;
+    private FirebaseAuth mAuth;
+    private StorageReference mStorageReference;
+    private FirebaseMethods mFirebaseMethods;
+
     private TextView mTextViewDescripcion;
     private TextView mTextViewFecha;
     private TextView mButtonEditarNota;
     private TextView mButtonElimnarNota;
     private FloatingActionButton mFloatingActionButton;
-
-    private static final int GalleriaPick = 1;
-    private FirebaseFirestore db;
-    private DocumentSnapshot mLastQueriedDocument;
-    private FirebaseAuth mAuth;
-    private Uri mImageUri;
-    private String id_nota;
-    public static String curso_id;
-    private String nombre_nota;
-    private StorageReference mStorageReference;
-    Notas mNote = null;
-    private FirebaseMethods mFirebaseMethods;
-
     private RecyclerView mRecyclerView;
     private AdaptadorCuestionario mAdaptadorCuestionario;
     private ArrayList<Cuestionario> cuestionarios;
 
-    //private FirebaseMethods firebaseMethods;
+    private Uri mImageUri;
+    private String id_nota;
+    public static String curso_id;
+    private String nombre_nota;
+    Notas mNote = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,13 +162,15 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
                     builder.setTitle("Confirmar");
                     builder.setMessage("Esta seguro de eliminar esta nota?");
 
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
 
                         public void onClick(DialogInterface dialog, int which) {
                             // Do nothing but close the dialog
                             db = FirebaseFirestore.getInstance();
 
                             DocumentReference noteRef = db
+                                    .collection(NODO_CURSOS)
+                                    .document(curso_id)
                                     .collection(NODO_NOTAS)
                                     .document(finalMNote.getIdNota());
 
@@ -229,11 +228,14 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
         mRecyclerView.setAdapter(mAdaptadorCuestionario);
     }
 
-
     private void getAlumnos(String id_notas) {
         db = FirebaseFirestore.getInstance();
 
-        CollectionReference notesCollectionRef = db.collection(NODO_CURSOS).document(curso_id).collection(NODO_NOTAS).document(id_nota).collection(NODO_CUESTIONARIO);
+        CollectionReference notesCollectionRef = db
+                .collection(NODO_CURSOS)
+                .document(curso_id)
+                .collection(NODO_NOTAS)
+                .document(id_nota).collection(NODO_CUESTIONARIO);
 
         Query notesQuery = null;
         if (mLastQueriedDocument != null) {
@@ -322,6 +324,36 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
     @Override
     protected void onResume() {
         super.onResume();
+        getUpdateNotasRefresh();
+        getUpdateCuestionarioRefresh();
+    }
+
+    private void getUpdateCuestionarioRefresh() {
+        db.collection(NODO_CURSOS).document(curso_id).collection(NODO_NOTAS).document(id_nota).collection(NODO_CUESTIONARIO)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+
+                        if (cuestionarios.size() == 0) {
+                            cuestionarios.clear();
+                        } else {
+                            cuestionarios.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Cuestionario cuestionario = doc.toObject(Cuestionario.class);
+                                cuestionarios.add(cuestionario);
+                            }
+                        }
+                        mAdaptadorCuestionario.notifyDataSetChanged();
+                    }
+                });
+    }
+
+    private void getUpdateNotasRefresh() {
         db.collection(NODO_CURSOS).document(curso_id).collection(NODO_NOTAS)
                 .whereEqualTo(PARAMETRO_ID_NOTA, id_nota)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {

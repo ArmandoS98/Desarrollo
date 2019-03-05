@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager().beginTransaction().add(R.id.contenedorDeCosas,mediaFragment).commit();*/
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if (fragmentoGenerico instanceof FormulasFragment) {
+            if (fragmentoGenerico instanceof CursosFragment) {
                 super.onBackPressed();
             } else {
                 showHome();
@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showHome() {
-        fragmentoGenerico = new FormulasFragment();
+        fragmentoGenerico = new CursosFragment();
         if (fragmentoGenerico != null) {
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);// Colocas el id de tu NavigationView
             setTitle(navigationView.getMenu().getItem(0).getTitle());

@@ -41,32 +41,7 @@ public class AdaptadorCuestionario extends RecyclerView.Adapter<AdaptadorCuestio
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, final int i) {
         if (viewHolder != null) {
             viewHolder.mTextViewPregunta.setText(cuestionarios.get(i).getPregunta());
-
-            viewHolder.mTextViewPregunta.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(context, "Respuesta: " + cuestionarios.get(i).getRespuesta_txt(), Toast.LENGTH_LONG).show();
-                }
-            });
-            viewHolder.mEditTextRespuesta.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    if (viewHolder.mEditTextRespuesta.getText().toString() != cuestionarios.get(i).getRespuesta_txt()) {
-                        viewHolder.mEditTextRespuesta.setTextColor(Color.RED);
-                    } else {
-                        viewHolder.mEditTextRespuesta.setTextColor(Color.GREEN);
-                    }
-                }
-            });
+            viewHolder.mEditTextRespuesta.setHint(cuestionarios.get(i).getRespuesta_txt());
         }
     }
 

@@ -13,12 +13,14 @@
 
         <TextView
             android:id="@+id/tv_titulo"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
             android:text="¿Que es pseudocodigo?"
             android:textAlignment="center"
             android:layout_centerHorizontal="true"
+            android:textColor="@android:color/white"
+            android:background="@color/colorPrimary"
+            android:padding="5dp"
             android:textSize="18sp" />
 
         <EditText
@@ -26,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tv_titulo"
-            android:layout_marginTop="10dp"
-            android:hint="Respuesta" />
+            android:hint="Respuesta"
+            android:layout_marginBottom="5dp"/>
     </RelativeLayout>
 </android.support.v7.widget.CardView>
