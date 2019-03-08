@@ -3,6 +3,7 @@ package com.santos.dev;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -46,9 +47,12 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.santos.dev.UI.Activities.PerfilActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import dmax.dialog.SpotsDialog;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -67,6 +71,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private FirebaseAuth mFirebaseAuth;
 
     private SignInButton mSignInButton;
+
+    private AlertDialog alertDialog;
 
 
     /**
@@ -98,6 +104,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        alertDialog = new SpotsDialog.Builder().setContext(this).build();
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -152,10 +159,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    private void initDialogProgress(int flag, String titulo) {
+        switch (flag) {
+            case 1:
+                alertDialog.setTitle("Uploading Post");
+                alertDialog.setMessage(titulo);
+                alertDialog.show();
+                break;
+            case 2:
+                alertDialog.dismiss();
+                break;
+            case 3:
+                alertDialog.setMessage(titulo);
+                break;
+            default:
+                break;
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        initDialogProgress(1, "Obteniendo Cuenta!");
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
@@ -178,6 +203,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
+                        initDialogProgress(3,"Configurando Cuenta");
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
@@ -186,7 +212,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            initDialogProgress(2,"Configurando Cuenta");
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
                             finish();
                         }
                     }

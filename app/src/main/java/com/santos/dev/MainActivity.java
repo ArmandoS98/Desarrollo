@@ -2,12 +2,9 @@ package com.santos.dev;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -32,29 +29,21 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnPausedListener;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Interfaz.IMainMaestro;
-import com.santos.dev.Models.Cuestionario;
 import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
+import com.santos.dev.UI.Activities.PerfilActivity;
 import com.santos.dev.UI.Activities.TabActivity;
 import com.santos.dev.UI.ConversionesFragment;
-import com.santos.dev.UI.FormulasFragment;
 import com.santos.dev.UI.Activities.NuevoCursooActivity;
 import com.santos.dev.UI.CursosFragment;
 import com.santos.dev.Utils.FirebaseMethods;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-
-import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, IMainMaestro,
@@ -196,6 +185,8 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, "Esta opcion esta en desarrollo", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_manage) {
             openWhatsApp();
+        } else if (id == R.id.nav_configuracion) {
+            startActivity(new Intent(MainActivity.this, PerfilActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
         }
 
         if (fragmentoGenerico != null) {

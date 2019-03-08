@@ -14,7 +14,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".UI.Activities.TabActivity"></activity>
+        <activity android:name=".UI.Activities.PerfilActivity"></activity>
+        <activity android:name=".UI.Activities.TabActivity" />
         <activity android:name=".UI.Activities.NuevoCursooActivity" />
         <activity android:name=".UI.Activities.ShowActivity" />
         <activity

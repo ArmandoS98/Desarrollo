@@ -44,4 +44,6 @@
     <color name="linkBlue">#4d94ff</color>
     <color name="red3">#e50909</color>
 
+    <color name="black_overlay">#66000000</color>
+
 </resources>

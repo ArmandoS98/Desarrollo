@@ -51,5 +51,10 @@ dependencies {
 
     //change color
     implementation 'com.github.yukuku:ambilwarna:2.0.1'
+
+    //dialog progress
+    implementation 'com.github.d-max:spots-dialog:1.1@aar'
+
+
 }
 apply plugin: 'com.google.gms.google-services'
