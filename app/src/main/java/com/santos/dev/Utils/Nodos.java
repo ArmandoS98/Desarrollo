@@ -2,9 +2,10 @@ package com.santos.dev.Utils;
 
 public class Nodos {
     //Collections
-    public static final String NODO_NOTAS = "Notas";
     public static final String NODO_CURSOS = "Cursos";
+    public static final String NODO_NOTAS = "Notas";
     public static final String NODO_CUESTIONARIO = "Cuestionario";
+    public static final String NODO_IMAGENES_ANIADIDAS = "Archivos";
 
     //Sub-Collections
     public static final String SUB_COLLECTION_CURSOS = "Cursos";
@@ -21,7 +22,7 @@ public class Nodos {
     public static final String CONTENIDO_NOTA = "descripcionNota";
 
     //VALIDACION DEL USUARIO PARA EDITAR INFORMACION
-    public static final String IDENTIFICADOR_USUARIO = "id_user_settings";
+    public static final String IDENTIFICADOR_USUARIO = "id_user_settings"; //id_user_settings
 
     //VAR PARA NUESTROS INTENTES
     public static final String KEY ="dato";

@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.santos.dev.Models.ArchivosAniadidos;
 import com.santos.dev.Models.Cuestionario;
 import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
@@ -23,8 +24,8 @@ import java.util.Date;
 
 import static com.santos.dev.Utils.Nodos.NODO_CUESTIONARIO;
 import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
+import static com.santos.dev.Utils.Nodos.NODO_IMAGENES_ANIADIDAS;
 import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
-import static com.santos.dev.Utils.Nodos.SUB_COLLECTION_CURSOS;
 
 public class FirebaseMethods {
     private static final String TAG = "FirebaseMethods";
@@ -174,6 +175,40 @@ public class FirebaseMethods {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(mContext, "Cuestionario Creado", Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * @param datos
+     */
+    public void nuevoArchivo(String... datos) {
+        //datos(0) = id del nota
+        //datos(1) = url
+        //datos(2) = descripcion
+        //datos(3) = id curso
+        newNoteRef = db
+                .collection(NODO_CURSOS)
+                .document(datos[3])
+                .collection(NODO_NOTAS)
+                .document(datos[0])
+                .collection(NODO_IMAGENES_ANIADIDAS)
+                .document();
+
+        ArchivosAniadidos archivosAniadidos = new ArchivosAniadidos();
+        archivosAniadidos.setId_image(newNoteRef.getId());
+        archivosAniadidos.setId_nota(datos[0]);
+        archivosAniadidos.setUrl(datos[1]);
+        archivosAniadidos.setDescripcion(datos[2]);
+
+
+        newNoteRef.set(archivosAniadidos).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(mContext, "Archivo creado", Toast.LENGTH_SHORT).show();
                 } else
                     Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
             }

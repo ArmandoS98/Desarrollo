@@ -63,7 +63,6 @@ public class AdaptadorCursos extends RecyclerView.Adapter<AdaptadorCursos.ViewHo
 
         @Override
         public void onClick(View v) {
-
             mSelectedNoteIndex = getAdapterPosition();
             mIMainMaestro.onCursotoNotaa(cursos.get(mSelectedNoteIndex));
         }

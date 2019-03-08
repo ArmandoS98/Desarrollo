@@ -43,7 +43,6 @@ import static com.santos.dev.Utils.Nodos.PARAMETRO_VALOR;
 
 public class FormulasFragment extends Fragment {
     private static final String TAG = "FormulasFragment";
-    public static final String NOTAS_DATABASE = "Notas";
     private RecyclerView mRecyclerViewHoirzaontal;
     private RecyclerView mRecyclerViewConverciones;
     private ArrayList<FormulaG> mFormulaGS;
@@ -57,6 +56,8 @@ public class FormulasFragment extends Fragment {
     private FirebaseMethods firebaseMethods;
     private AdaptadorNotas mAdaptadorNotas;
     private RotateLoading mRotateLoading;
+    private FirebaseFirestore db;
+    private CollectionReference notesCollectionRef;
 
 
     public FormulasFragment() {
@@ -103,9 +104,6 @@ public class FormulasFragment extends Fragment {
         return view;
     }
 
-    FirebaseFirestore db;
-    CollectionReference notesCollectionRef;
-
     private void getAlumnos() {
         db = FirebaseFirestore.getInstance();
 
@@ -127,29 +125,22 @@ public class FormulasFragment extends Fragment {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
 
-                    //mImageViewNoHayTasks.setVisibility(View.GONE);
-                    //mTextViewNoHayTasks.setVisibility(View.GONE);
-
+                    alumnos.clear();
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Notas alumno = document.toObject(Notas.class);
                         alumnos.add(alumno);
                     }
 
-                    /*if (alumnos.size() == 0) {
-                        mTextViewNoDatos.setVisibility(View.VISIBLE);
-                    }*/
+                    if (alumnos.size() == 0) {
+                        //mTextViewNoDatos.setVisibility(View.VISIBLE);
+                    }
 
                     if (task.getResult().size() != 0) {
                         mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
                     }
 
-                    //imagenanimada.setVisibility(View.GONE);
-
                     mRotateLoading.stop();
-                    //imagenanimada.pauseAnimation();
-                    //imagenanimada.setVisibility(View.GONE);
                     mAdaptadorNotas.notifyDataSetChanged();
-                    //runAnimation(mRecyclerView,0);
                 } else {
                     Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
                 }
@@ -165,26 +156,8 @@ public class FormulasFragment extends Fragment {
         }
 
         recyclergenerico.setLayoutManager(new LinearLayoutManager(getContext()));
-
-
         //StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayout.VERTICAL);
-
         recyclergenerico.setAdapter(mAdaptadorNotas);
-    }
-
-    private void getInfo() {
-        mConversiones = new ArrayList<>();
-        mConversiones.add(new Conversiones("π radianes", "180°", R.drawable.radianes));
-        mConversiones.add(new Conversiones("Revoluciones", "180°", R.drawable.rev));
-        mConversiones.add(new Conversiones("Gon", "180°", R.drawable.gons));
-
-    }
-
-    private void getData() {
-        mFormulaGS = new ArrayList<>();
-        mFormulaGS.add(new FormulaG("π radianes", "π radianes"));
-        mFormulaGS.add(new FormulaG("Centigrados", "180°"));
-        mFormulaGS.add(new FormulaG("GON", "200"));
     }
 
     @Override
@@ -204,21 +177,17 @@ public class FormulasFragment extends Fragment {
 
                         if (alumnos.size() == 0) {
                             alumnos.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Notas grado = doc.toObject(Notas.class);
+                                alumnos.add(grado);
+                            }
                         } else {
                             alumnos.clear();
                             for (QueryDocumentSnapshot doc : value) {
                                 Notas grado = doc.toObject(Notas.class);
                                 alumnos.add(grado);
                             }
-
-                            /*if (alumnos.size() == 0) {
-                                mTextViewNoDatos.setVisibility(View.VISIBLE);
-                            } else {
-                                mTextViewNoDatos.setVisibility(View.GONE);
-                            }*/
-
                         }
-
                         mAdaptadorNotas.notifyDataSetChanged();
                     }
                 });

@@ -238,10 +238,6 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onCursotoNotaa: Curso: " + cursos);
         Intent intent = new Intent(this, TabActivity.class);
         intent.putExtra(KEY_NOTAS, cursos);
-        SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
-        String date = spf.format(cursos.getTimestamp());
-        intent.putExtra("date", date);
-
         startActivity(intent);
     }
 

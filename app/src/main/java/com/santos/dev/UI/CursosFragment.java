@@ -36,6 +36,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import static com.santos.dev.Utils.Nodos.IDENTIFICADOR_USUARIO;
 import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
 import static com.santos.dev.Utils.Nodos.PARAMETRO_KEY;
 import static com.santos.dev.Utils.Nodos.PARAMETRO_VALOR;
@@ -52,6 +53,9 @@ public class CursosFragment extends Fragment {
     private AdaptadorCursos mAdaptadorNotas;
     private FirebaseAuth mAuth;
     private FirebaseUser mFirebaseUser;
+    private FirebaseFirestore db;
+    private CollectionReference notesCollectionRef;
+
 
     public CursosFragment() {
         // Required empty public constructor
@@ -81,9 +85,6 @@ public class CursosFragment extends Fragment {
         return view;
     }
 
-    FirebaseFirestore db;
-    CollectionReference notesCollectionRef;
-
     private void getAlumnos() {
         db = FirebaseFirestore.getInstance();
 
@@ -95,11 +96,11 @@ public class CursosFragment extends Fragment {
         Query notesQuery = null;
         if (mLastQueriedDocument != null) {
             notesQuery = notesCollectionRef
-                    .whereEqualTo("id_user_settings", mFirebaseUser.getUid())
+                    .whereEqualTo(IDENTIFICADOR_USUARIO, mFirebaseUser.getUid())
                     .startAfter(mLastQueriedDocument);
         } else {
             notesQuery = notesCollectionRef
-                    .whereEqualTo("id_user_settings", mFirebaseUser.getUid());
+                    .whereEqualTo(IDENTIFICADOR_USUARIO, mFirebaseUser.getUid());
         }
 
 
@@ -107,30 +108,22 @@ public class CursosFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
-
-                    //mImageViewNoHayTasks.setVisibility(View.GONE);
-                    //mTextViewNoHayTasks.setVisibility(View.GONE);
-
+                    mCursos.clear();
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Cursos cursos = document.toObject(Cursos.class);
                         mCursos.add(cursos);
                     }
 
-                    /*if (alumnos.size() == 0) {
-                        mTextViewNoDatos.setVisibility(View.VISIBLE);
-                    }*/
+                    if (mCursos.size() == 0) {
+                        //   mTextViewNoDatos.setVisibility(View.VISIBLE);
+                    }
 
                     if (task.getResult().size() != 0) {
                         mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
                     }
 
-                    //imagenanimada.setVisibility(View.GONE);
-
                     mRotateLoading.stop();
-                    //imagenanimada.pauseAnimation();
-                    //imagenanimada.setVisibility(View.GONE);
                     mAdaptadorNotas.notifyDataSetChanged();
-                    //runAnimation(mRecyclerView,0);
                 } else {
                     Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
                 }
@@ -154,7 +147,7 @@ public class CursosFragment extends Fragment {
     public void onResume() {
         super.onResume();
         db.collection(NODO_CURSOS)
-                .whereEqualTo("id_user_settings", mFirebaseUser.getUid())
+                .whereEqualTo(IDENTIFICADOR_USUARIO, mFirebaseUser.getUid())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
@@ -167,19 +160,16 @@ public class CursosFragment extends Fragment {
 
                         if (mCursos.size() == 0) {
                             mCursos.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Cursos cursos = doc.toObject(Cursos.class);
+                                mCursos.add(cursos);
+                            }
                         } else {
                             mCursos.clear();
                             for (QueryDocumentSnapshot doc : value) {
                                 Cursos cursos = doc.toObject(Cursos.class);
                                 mCursos.add(cursos);
                             }
-
-                            /*if (alumnos.size() == 0) {
-                                mTextViewNoDatos.setVisibility(View.VISIBLE);
-                            } else {
-                                mTextViewNoDatos.setVisibility(View.GONE);
-                            }*/
-
                         }
 
                         mAdaptadorNotas.notifyDataSetChanged();

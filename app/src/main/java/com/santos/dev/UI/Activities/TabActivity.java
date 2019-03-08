@@ -74,24 +74,22 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
     private AppBarLayout appBar;
     private TabLayout pestanas;
     private ViewPager viewPager;
+    private Dialog epicDialog;
 
     //FirebaseMethods
     private FirebaseMethods firebaseMethods;
-    private Dialog epicDialog;
-
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private GoogleApiClient mGoogleApiClient;
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
-    private Uri mImageUri;
     private StorageReference mStorageReference;
 
     private String url_imagen;
     public static String id_docuento;
-
     private int currentColor;
     private Cursos cursos = null;
+    private Uri mImageUri;
 
 
     @Override
@@ -185,8 +183,15 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         Log.d(TAG, "onNotaSeleccionada: Nota" + notas);
         Intent intent = new Intent(this, ShowActivity.class);
         intent.putExtra(KEY_NOTAS, notas);
-        SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
-        String date = spf.format(notas.getTimestamp());
+        String date = "";
+
+
+        if (notas.getTimestamp().toString() != null) {
+            SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
+            date = spf.format(notas.getTimestamp());
+        }else{
+            date="Hace unos momentos";
+        }
         intent.putExtra("date", date);
         intent.putExtra(KEY, id_docuento);
         startActivity(intent);

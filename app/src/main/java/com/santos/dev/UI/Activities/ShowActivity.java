@@ -1,7 +1,10 @@
 package com.santos.dev.UI.Activities;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -17,15 +20,24 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -35,55 +47,76 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnPausedListener;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Adapters.AdaptadorCuestionario;
 import com.santos.dev.Adapters.AdaptadorNotas;
+import com.santos.dev.Adapters.AdapterArchivosAdicionales;
 import com.santos.dev.Dialogs.Dialog_FullScreen;
 import com.santos.dev.Dialogs.Dialog_FullScreen_Cuestionario;
 import com.santos.dev.Interfaz.IMainMaestro;
+import com.santos.dev.Models.ArchivosAniadidos;
 import com.santos.dev.Models.Cuestionario;
 import com.santos.dev.Models.Cursos;
 import com.santos.dev.Models.Notas;
 import com.santos.dev.R;
 import com.santos.dev.Utils.FirebaseMethods;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.annotation.Nullable;
 
 import static com.santos.dev.MainActivity.KEY_NOTAS;
+import static com.santos.dev.UI.Activities.TabActivity.FOTO1;
 import static com.santos.dev.UI.Activities.TabActivity.id_docuento;
 import static com.santos.dev.Utils.Nodos.CONTENIDO_NOTA;
 import static com.santos.dev.Utils.Nodos.KEY;
 import static com.santos.dev.Utils.Nodos.NODO_CUESTIONARIO;
 import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
+import static com.santos.dev.Utils.Nodos.NODO_IMAGENES_ANIADIDAS;
 import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
 import static com.santos.dev.Utils.Nodos.PARAMETRO_ID_NOTA;
 import static com.santos.dev.Utils.Nodos.TITULO_NOTA;
 
 public class ShowActivity extends AppCompatActivity implements IMainMaestro {
     private static final String TAG = "ShowActivity";
+    private static final int GalleriaPick = 1;
 
+    private FirebaseMethods firebaseMethods;
+    private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
     private DocumentSnapshot mLastQueriedDocument;
     private FirebaseAuth mAuth;
     private StorageReference mStorageReference;
     private FirebaseMethods mFirebaseMethods;
 
+    private Dialog epicDialog;
     private TextView mTextViewDescripcion;
+    private ImageButton mImageButtonArchivo;
     private TextView mTextViewFecha;
     private TextView mButtonEditarNota;
     private TextView mButtonElimnarNota;
     private FloatingActionButton mFloatingActionButton;
     private RecyclerView mRecyclerView;
+    private RecyclerView mRecyclerViewArchivos;
     private AdaptadorCuestionario mAdaptadorCuestionario;
+    private AdapterArchivosAdicionales mAdapterArchivosAdicionales;
     private ArrayList<Cuestionario> cuestionarios;
+    private ArrayList<ArchivosAniadidos> archivosAgregados;
 
     private Uri mImageUri;
     private String id_nota;
     public static String curso_id;
     private String nombre_nota;
-    Notas mNote = null;
+    private Notas mNote = null;
+    private String url_imagen;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +124,11 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
         setContentView(R.layout.activity_show);
 
         mAuth = FirebaseAuth.getInstance();
+        firebaseUser = mAuth.getCurrentUser();
         db = FirebaseFirestore.getInstance();
         mFirebaseMethods = new FirebaseMethods(this);
+
+        epicDialog = new Dialog(this);
 
         Intent i = getIntent();
         mNote = i.getParcelableExtra(KEY_NOTAS);
@@ -120,16 +156,23 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
             mButtonEditarNota = findViewById(R.id.tv_editar_nota);
             mButtonElimnarNota = findViewById(R.id.tv_eliminar_nota);
             mFloatingActionButton = findViewById(R.id.fab);
+            mRecyclerView = findViewById(R.id.recyclergenerico);
+            mRecyclerViewArchivos = findViewById(R.id.recyclergenerico_arcivos_agregados);
+            mImageButtonArchivo = findViewById(R.id.img_archivo);
 
             String date = getIntent().getStringExtra("date");
             curso_id = getIntent().getStringExtra(KEY);
             mTextViewFecha.setText(date);
             id_nota = mNote.getIdNota();
 
-            mRecyclerView = findViewById(R.id.recyclergenerico);
             mRecyclerView.setHasFixedSize(true);
+            mRecyclerViewArchivos.setHasFixedSize(true);
+
             cuestionarios = new ArrayList<>();
+            archivosAgregados = new ArrayList<>();
+
             getAlumnos(id_nota);
+            getImagenAniadidas(id_nota);
             initRecyclerView();
 
             if (mNote.getId_user_settings().equals(mAuth.getUid())) {
@@ -212,9 +255,109 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
                 }
             });
 
+            mImageButtonArchivo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent galeriaIntent = new Intent();
+                    galeriaIntent.setAction(Intent.ACTION_GET_CONTENT);
+                    galeriaIntent.setType("image/*");
+                    startActivityForResult(galeriaIntent, GalleriaPick);
+                }
+            });
+
             mTextViewDescripcion.setText(mNote.getDescripcionNota());
 
         }
+    }
+
+    private void showTheNewDialog(int type, final Uri mImageUri) {
+
+        //Inicializacion de nuestros metodos
+        firebaseMethods = new FirebaseMethods(this);
+        epicDialog.setContentView(R.layout.nuevo_archivo_imagen);
+        epicDialog.getWindow().getAttributes().windowAnimations = type;
+        epicDialog.setCancelable(false);
+
+        //Widgets
+        final ImageView closePopupPositiveImg = epicDialog.findViewById(R.id.closePopupPositive);
+        final ImageView imagenPreview = epicDialog.findViewById(R.id.img_preview);
+        final Button aceptar = epicDialog.findViewById(R.id.btn_acept);
+        final EditText mEditTextTitulo = epicDialog.findViewById(R.id.note_title);
+
+        closePopupPositiveImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                epicDialog.dismiss();
+            }
+        });
+
+        mStorageReference = FirebaseStorage.getInstance().getReference("Imagenes");
+
+        RequestOptions options = new RequestOptions()
+                .centerCrop()
+                .placeholder(R.drawable.ic_close_black_24dp)
+                .error(R.drawable.ic_close_black_24dp)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .priority(Priority.HIGH);
+
+        Glide.with(this)
+                .load(mImageUri)
+                .apply(options)
+                .into(imagenPreview);
+
+        aceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Todo: obtenemos los valores de las vistas corresponidnetes
+                String nombre = mEditTextTitulo.getText().toString();
+
+                if (checkInputs(nombre)) {
+                    saveNuevoArchivo(nombre, mImageUri);
+                    //crearNuevoAlumno(nombre, apellidos, edad);
+                    epicDialog.dismiss();
+                }
+            }
+        });
+
+        epicDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        epicDialog.show();
+    }
+
+    private boolean checkInputs(String nombres) {
+        if (nombres.equals("")) {
+            Toast.makeText(this, "Todos los compos son obligatorios", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void saveNuevoArchivo(final String nombre, Uri mImageUri) {
+        StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ "acpu" + firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
+
+        fileReference.putFile(this.mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                url_imagen = taskSnapshot.getDownloadUrl().toString();
+                firebaseMethods.nuevoArchivo(
+                        id_nota,
+                        url_imagen,
+                        nombre,
+                        curso_id);
+            }
+        }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                System.out.println("Upload is paused");
+            }
+        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+
+                System.out.println("Upload is " + progress + "% done");
+            }
+        });
     }
 
     //Este metodo inicia el recycler view con sus componentes
@@ -223,9 +366,17 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
             mAdaptadorCuestionario = new AdaptadorCuestionario(this, cuestionarios);
         }
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        if (mAdapterArchivosAdicionales == null) {
+            mAdapterArchivosAdicionales = new AdapterArchivosAdicionales(this, archivosAgregados);
+        }
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         //StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayout.VERTICAL);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerViewArchivos.setLayoutManager(linearLayoutManager);
+
         mRecyclerView.setAdapter(mAdaptadorCuestionario);
+        mRecyclerViewArchivos.setAdapter(mAdapterArchivosAdicionales);
     }
 
     private void getAlumnos(String id_notas) {
@@ -253,29 +404,71 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
 
-                    //mImageViewNoHayTasks.setVisibility(View.GONE);
-                    //mTextViewNoHayTasks.setVisibility(View.GONE);
-
+                    cuestionarios.clear();
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Cuestionario _cuestionario = document.toObject(Cuestionario.class);
                         cuestionarios.add(_cuestionario);
                     }
 
-                    /*if (alumnos.size() == 0) {
-                        mTextViewNoDatos.setVisibility(View.VISIBLE);
-                    }*/
+                    if (cuestionarios.size() == 0) {
+                        //mTextViewNoDatos.setVisibility(View.VISIBLE);
+                    }
 
                     if (task.getResult().size() != 0) {
                         mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
                     }
 
-                    //imagenanimada.setVisibility(View.GONE);
-
-                    //mRotateLoading.stop();
-                    //imagenanimada.pauseAnimation();
-                    //imagenanimada.setVisibility(View.GONE);
                     mAdaptadorCuestionario.notifyDataSetChanged();
-                    //runAnimation(mRecyclerView,0);
+                } else {
+                    Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
+
+    private void getImagenAniadidas(String id_notas) {
+        db = FirebaseFirestore.getInstance();
+
+        CollectionReference notesCollectionRef = db
+                .collection(NODO_CURSOS)
+                .document(curso_id)
+                .collection(NODO_NOTAS)
+                .document(id_nota)
+                .collection(NODO_IMAGENES_ANIADIDAS);
+
+        Query notesQuery = null;
+        if (mLastQueriedDocument != null) {
+            notesQuery = notesCollectionRef
+                    .whereEqualTo("id_nota", id_nota)
+                    .startAfter(mLastQueriedDocument);
+        } else {
+            notesQuery = notesCollectionRef
+                    .whereEqualTo("id_nota", id_nota);
+        }
+
+
+        notesQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+
+                    archivosAgregados.clear();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        ArchivosAniadidos archivosAniadidos = document.toObject(ArchivosAniadidos.class);
+                        archivosAgregados.add(archivosAniadidos);
+                    }
+
+                    if (archivosAgregados.size() == 0) {
+                        //mTextViewNoDatos.setVisibility(View.VISIBLE);
+                        Toast.makeText(ShowActivity.this, "No hay ningun archivo!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    if (task.getResult().size() != 0) {
+                        mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
+                    }
+
+                    mAdapterArchivosAdicionales.notifyDataSetChanged();
                 } else {
                     Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
                 }
@@ -326,6 +519,7 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
         super.onResume();
         getUpdateNotasRefresh();
         getUpdateCuestionarioRefresh();
+        getUpdateArchivoRefresh();
     }
 
     private void getUpdateCuestionarioRefresh() {
@@ -341,6 +535,10 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
 
                         if (cuestionarios.size() == 0) {
                             cuestionarios.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Cuestionario cuestionario = doc.toObject(Cuestionario.class);
+                                cuestionarios.add(cuestionario);
+                            }
                         } else {
                             cuestionarios.clear();
                             for (QueryDocumentSnapshot doc : value) {
@@ -349,6 +547,39 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
                             }
                         }
                         mAdaptadorCuestionario.notifyDataSetChanged();
+                    }
+                });
+    }
+
+    private void getUpdateArchivoRefresh() {
+        db.collection(NODO_CURSOS)
+                .document(curso_id)
+                .collection(NODO_NOTAS)
+                .document(id_nota)
+                .collection(NODO_IMAGENES_ANIADIDAS)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+
+                        if (archivosAgregados.size() == 0) {
+                            archivosAgregados.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                ArchivosAniadidos archivosAniadidos = doc.toObject(ArchivosAniadidos.class);
+                                archivosAgregados.add(archivosAniadidos);
+                            }
+                        } else {
+                            archivosAgregados.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                ArchivosAniadidos archivosAniadidos = doc.toObject(ArchivosAniadidos.class);
+                                archivosAgregados.add(archivosAniadidos);
+                            }
+                        }
+                        mAdapterArchivosAdicionales.notifyDataSetChanged();
                     }
                 });
     }
@@ -424,4 +655,24 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @android.support.annotation.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GalleriaPick && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+
+            mImageUri = data.getData();
+
+            showTheNewDialog(R.style.DialogScale, mImageUri);
+
+        }
+    }
+
+    private String getDate() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE dd MMMM yyyy  HH:mm:ss", Locale.getDefault());
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
 }
