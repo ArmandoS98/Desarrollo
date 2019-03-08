@@ -10,9 +10,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.santos.dev.Models.ArchivosAniadidos;
 import com.santos.dev.Models.Cuestionario;
 import com.santos.dev.Models.Cursos;
@@ -22,10 +26,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static com.santos.dev.Utils.Nodos.IDENTIFICADOR_USUARIO;
 import static com.santos.dev.Utils.Nodos.NODO_CUESTIONARIO;
 import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
 import static com.santos.dev.Utils.Nodos.NODO_IMAGENES_ANIADIDAS;
 import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
+import static com.santos.dev.Utils.Nodos.NODO_USUARIOS;
 
 public class FirebaseMethods {
     private static final String TAG = "FirebaseMethods";
@@ -213,6 +219,38 @@ public class FirebaseMethods {
                     Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    boolean encontrado = false;
+
+    //TODO: BUSQUEDAS
+    public boolean cuenteExisteEnFirebase(String... datos) {
+
+        db = FirebaseFirestore.getInstance();
+
+        DocumentReference docRef = db.collection(NODO_USUARIOS).document(datos[0]);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        encontrado = true;
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                    } else {
+                        Log.d(TAG, "No such document");
+                        encontrado = false;
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                    encontrado = false;
+                }
+            }
+        });
+
+
+        return encontrado;
     }
 
     /*public void addNewMaestro(final String correo, String colegio_ID, String nombres, String apellidos, String edad, String DPI, String telefono, final String grado_asignado) {

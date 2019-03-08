@@ -46,8 +46,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.santos.dev.UI.Activities.PerfilActivity;
+import com.santos.dev.Utils.FirebaseMethods;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -203,7 +205,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
-                        initDialogProgress(3,"Configurando Cuenta");
+                        initDialogProgress(3, "Configurando Cuenta");
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
@@ -212,12 +214,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            initDialogProgress(2,"Configurando Cuenta");
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
-                            finish();
+                            initDialogProgress(2, "Configurando Cuenta");
+                            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                            FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                            FirebaseMethods firebaseMethods = new FirebaseMethods(LoginActivity.this);
+                            if (firebaseMethods.cuenteExisteEnFirebase(firebaseUser.getUid()) == true) {
+                                //startActivity(new Intent(LoginActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
+                                //finish();
+                                Toast.makeText(LoginActivity.this, "Encontrado", Toast.LENGTH_SHORT).show();
+                            }else{
+                                FirebaseAuth.getInstance().signOut();
+                                getMensaje();
+                                //Parte de insercion en la DB
+                            }
+
                         }
                     }
                 });
+    }
+
+    private void getMensaje() {
     }
 
     @Override

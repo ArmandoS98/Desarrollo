@@ -3,6 +3,7 @@ package com.santos.dev.Utils;
 public class Nodos {
     //Collections
     public static final String NODO_CURSOS = "Cursos";
+    public static final String NODO_USUARIOS = "Usuarios";
     public static final String NODO_NOTAS = "Notas";
     public static final String NODO_CUESTIONARIO = "Cuestionario";
     public static final String NODO_IMAGENES_ANIADIDAS = "Archivos";
