@@ -29,27 +29,23 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnPausedListener;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Interfaz.IMainMaestro;
-import com.santos.dev.MainActivity;
-import com.santos.dev.Models.Cuestionario;
-import com.santos.dev.Models.Cursos;
-import com.santos.dev.Models.Notas;
+import com.santos.firebasecomponents.Models.Cursos;
+import com.santos.firebasecomponents.Models.Notas;
 import com.santos.dev.R;
 import com.santos.dev.UI.CompartidosFragment;
 import com.santos.dev.UI.FormulasFragment;
-import com.santos.dev.Utils.FirebaseMethods;
+import com.santos.firebasecomponents.FirebaseMethods;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,9 +56,9 @@ import java.util.Locale;
 import yuku.ambilwarna.AmbilWarnaDialog;
 
 import static com.santos.dev.MainActivity.KEY_NOTAS;
-import static com.santos.dev.Utils.Nodos.KEY;
-import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
-import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
+import static com.santos.firebasecomponents.Nodos.KEY;
+import static com.santos.firebasecomponents.Nodos.NODO_CURSOS;
+import static com.santos.firebasecomponents.Nodos.NODO_NOTAS;
 
 public class TabActivity extends AppCompatActivity implements IMainMaestro {
 
@@ -189,8 +185,8 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         if (notas.getTimestamp().toString() != null) {
             SimpleDateFormat spf = new SimpleDateFormat("dd MMM, yyyy, HH:mm aa");
             date = spf.format(notas.getTimestamp());
-        }else{
-            date="Hace unos momentos";
+        } else {
+            date = "Hace unos momentos";
         }
         intent.putExtra("date", date);
         intent.putExtra(KEY, id_docuento);
@@ -418,12 +414,40 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
             mImageUri = data.getData();
 
 
-            StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
+            final StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
 
-            fileReference.putFile(mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            Task<Uri> urlTask = fileReference.putFile(mImageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    // Continue with the task to get the download URL
+                    return fileReference.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        url_imagen = downloadUri.toString();
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
+                }
+            });
+
+            if (urlTask != null) {
+                Toast.makeText(this, "Subido", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+            }
+          /*  fileReference.putFile(mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    url_imagen = taskSnapshot.getDownloadUrl().toString();
+                    url_imagen = StorageReference.getDownloadUrl().toString();
                     Toast.makeText(TabActivity.this, "Foto Subida", Toast.LENGTH_SHORT).show();
                 }
             }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
@@ -437,7 +461,7 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
                     double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                     System.out.println("Upload is " + progress + "% done");
                 }
-            });
+            });*/
         }
     }
 

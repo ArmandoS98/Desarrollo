@@ -7,10 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.santos.dev.Interfaz.IMainMaestro;
-import com.santos.dev.Models.Cursos;
+import com.santos.firebasecomponents.Models.Cursos;
 import com.santos.dev.R;
 
 import java.util.ArrayList;

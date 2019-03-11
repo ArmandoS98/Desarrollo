@@ -23,11 +23,11 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.santos.dev.Adapters.AdaptadorNotas;
-import com.santos.dev.Models.Conversiones;
-import com.santos.dev.Models.FormulaG;
-import com.santos.dev.Models.Notas;
+import com.santos.firebasecomponents.Models.Conversiones;
+import com.santos.firebasecomponents.Models.FormulaG;
+import com.santos.firebasecomponents.Models.Notas;
 import com.santos.dev.R;
-import com.santos.dev.Utils.FirebaseMethods;
+import com.santos.firebasecomponents.FirebaseMethods;
 import com.victor.loading.rotate.RotateLoading;
 
 import java.util.ArrayList;
@@ -35,11 +35,10 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 import static com.santos.dev.UI.Activities.TabActivity.id_docuento;
-import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
-import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
-import static com.santos.dev.Utils.Nodos.PARAMETRO_KEY;
-import static com.santos.dev.Utils.Nodos.PARAMETRO_VALOR;
-
+import static com.santos.firebasecomponents.Nodos.NODO_CURSOS;
+import static com.santos.firebasecomponents.Nodos.NODO_NOTAS;
+import static com.santos.firebasecomponents.Nodos.PARAMETRO_KEY;
+import static com.santos.firebasecomponents.Nodos.PARAMETRO_VALOR;
 
 public class FormulasFragment extends Fragment {
     private static final String TAG = "FormulasFragment";
@@ -107,7 +106,9 @@ public class FormulasFragment extends Fragment {
     private void getAlumnos() {
         db = FirebaseFirestore.getInstance();
 
-        notesCollectionRef = db.collection(NODO_CURSOS).document(id_docuento).collection(NODO_NOTAS);
+        notesCollectionRef = db.collection(NODO_CURSOS)
+                .document(id_docuento)
+                .collection(NODO_NOTAS);
 
         Query notesQuery = null;
         if (mLastQueriedDocument != null) {
@@ -163,7 +164,9 @@ public class FormulasFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        db.collection(NODO_CURSOS).document(id_docuento).collection(NODO_NOTAS)
+        db.collection(NODO_CURSOS)
+                .document(id_docuento)
+                .collection(NODO_NOTAS)
                 .whereEqualTo(PARAMETRO_KEY, PARAMETRO_VALOR)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override

@@ -1,11 +1,9 @@
 package com.santos.dev.Interfaz;
 
 
-import android.widget.ImageView;
-
-import com.santos.dev.Models.Cuestionario;
-import com.santos.dev.Models.Cursos;
-import com.santos.dev.Models.Notas;
+import com.santos.firebasecomponents.Models.Cuestionario;
+import com.santos.firebasecomponents.Models.Cursos;
+import com.santos.firebasecomponents.Models.Notas;
 
 public interface IMainMaestro {
     void onNotaSeleccionada(Notas notas);

@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.santos.dev.Models.ArchivosAniadidos;
+import com.santos.firebasecomponents.Models.ArchivosAniadidos;
 import com.santos.dev.R;
 
 import java.util.ArrayList;

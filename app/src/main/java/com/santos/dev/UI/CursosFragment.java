@@ -4,7 +4,6 @@ package com.santos.dev.UI;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -27,19 +26,17 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.santos.dev.Adapters.AdaptadorCursos;
-import com.santos.dev.Models.Cursos;
+import com.santos.firebasecomponents.Models.Cursos;
 import com.santos.dev.R;
-import com.santos.dev.Utils.FirebaseMethods;
+import com.santos.firebasecomponents.FirebaseMethods;
 import com.victor.loading.rotate.RotateLoading;
 
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import static com.santos.dev.Utils.Nodos.IDENTIFICADOR_USUARIO;
-import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
-import static com.santos.dev.Utils.Nodos.PARAMETRO_KEY;
-import static com.santos.dev.Utils.Nodos.PARAMETRO_VALOR;
+import static com.santos.firebasecomponents.Nodos.IDENTIFICADOR_USUARIO;
+import static com.santos.firebasecomponents.Nodos.NODO_CURSOS;
 
 public class CursosFragment extends Fragment {
     private static final String TAG = "CursosFragment";

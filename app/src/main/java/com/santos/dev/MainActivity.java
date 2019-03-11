@@ -32,14 +32,15 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Interfaz.IMainMaestro;
-import com.santos.dev.Models.Cursos;
-import com.santos.dev.Models.Notas;
+import com.santos.dev.UI.Activities.LoginUActivity;
+import com.santos.firebasecomponents.Models.Cursos;
+import com.santos.firebasecomponents.Models.Notas;
 import com.santos.dev.UI.Activities.PerfilActivity;
 import com.santos.dev.UI.Activities.TabActivity;
 import com.santos.dev.UI.ConversionesFragment;
 import com.santos.dev.UI.Activities.NuevoCursooActivity;
 import com.santos.dev.UI.CursosFragment;
-import com.santos.dev.Utils.FirebaseMethods;
+import com.santos.firebasecomponents.FirebaseMethods;
 
 import java.util.List;
 
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity
             }
         } else {
             firebaseUser = null;
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, LoginUActivity.class));
             finish();
         }
         //TODO: AQUI MANDAMOS A MOSTRAR EL FRAGMENTO CUANDO SE INICIA LA ACTIVIDAD

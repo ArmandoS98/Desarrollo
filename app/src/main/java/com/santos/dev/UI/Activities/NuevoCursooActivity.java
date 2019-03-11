@@ -1,19 +1,18 @@
 package com.santos.dev.UI.Activities;
 
-import android.print.PrinterId;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.santos.dev.R;
-import com.santos.dev.Utils.FirebaseMethods;
+import com.santos.firebasecomponents.FirebaseMethods;
 
-import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
+import static com.santos.firebasecomponents.Nodos.NODO_CURSOS;
+
 
 public class NuevoCursooActivity extends AppCompatActivity {
 

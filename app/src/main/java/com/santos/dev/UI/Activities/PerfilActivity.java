@@ -1,6 +1,5 @@
 package com.santos.dev.UI.Activities;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,11 +7,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.santos.dev.LoginActivity;
 import com.santos.dev.MainActivity;
 import com.santos.dev.R;
-
-import dmax.dialog.SpotsDialog;
 
 public class PerfilActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -23,7 +19,7 @@ public class PerfilActivity extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil);
 
-        Button btn  = findViewById(R.id.btn_hola);
+        Button btn = findViewById(R.id.btn_hola);
         btn.setOnClickListener(this);
         //mAuth.getInstance();
     }
@@ -34,7 +30,7 @@ public class PerfilActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.btn_hola:
                 FirebaseAuth.getInstance().signOut();
 
-                startActivity(new Intent(PerfilActivity.this, LoginActivity.class));
+                startActivity(new Intent(PerfilActivity.this, LoginUActivity.class));
                 finish();
                 break;
         }

@@ -22,10 +22,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,8 +31,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -48,22 +46,19 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnPausedListener;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Adapters.AdaptadorCuestionario;
-import com.santos.dev.Adapters.AdaptadorNotas;
 import com.santos.dev.Adapters.AdapterArchivosAdicionales;
 import com.santos.dev.Dialogs.Dialog_FullScreen;
 import com.santos.dev.Dialogs.Dialog_FullScreen_Cuestionario;
 import com.santos.dev.Interfaz.IMainMaestro;
-import com.santos.dev.Models.ArchivosAniadidos;
-import com.santos.dev.Models.Cuestionario;
-import com.santos.dev.Models.Cursos;
-import com.santos.dev.Models.Notas;
+import com.santos.firebasecomponents.Models.ArchivosAniadidos;
+import com.santos.firebasecomponents.Models.Cuestionario;
+import com.santos.firebasecomponents.Models.Cursos;
+import com.santos.firebasecomponents.Models.Notas;
 import com.santos.dev.R;
-import com.santos.dev.Utils.FirebaseMethods;
+import com.santos.firebasecomponents.FirebaseMethods;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -73,16 +68,14 @@ import java.util.Locale;
 import javax.annotation.Nullable;
 
 import static com.santos.dev.MainActivity.KEY_NOTAS;
-import static com.santos.dev.UI.Activities.TabActivity.FOTO1;
-import static com.santos.dev.UI.Activities.TabActivity.id_docuento;
-import static com.santos.dev.Utils.Nodos.CONTENIDO_NOTA;
-import static com.santos.dev.Utils.Nodos.KEY;
-import static com.santos.dev.Utils.Nodos.NODO_CUESTIONARIO;
-import static com.santos.dev.Utils.Nodos.NODO_CURSOS;
-import static com.santos.dev.Utils.Nodos.NODO_IMAGENES_ANIADIDAS;
-import static com.santos.dev.Utils.Nodos.NODO_NOTAS;
-import static com.santos.dev.Utils.Nodos.PARAMETRO_ID_NOTA;
-import static com.santos.dev.Utils.Nodos.TITULO_NOTA;
+import static com.santos.firebasecomponents.Nodos.CONTENIDO_NOTA;
+import static com.santos.firebasecomponents.Nodos.KEY;
+import static com.santos.firebasecomponents.Nodos.NODO_CUESTIONARIO;
+import static com.santos.firebasecomponents.Nodos.NODO_CURSOS;
+import static com.santos.firebasecomponents.Nodos.NODO_IMAGENES_ANIADIDAS;
+import static com.santos.firebasecomponents.Nodos.NODO_NOTAS;
+import static com.santos.firebasecomponents.Nodos.PARAMETRO_ID_NOTA;
+import static com.santos.firebasecomponents.Nodos.TITULO_NOTA;
 
 public class ShowActivity extends AppCompatActivity implements IMainMaestro {
     private static final String TAG = "ShowActivity";
@@ -184,85 +177,71 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
             }
 
             final Notas finalMNote = mNote;
-            mButtonEditarNota.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Dialog_FullScreen dialog_fullScreen = Dialog_FullScreen.newInstance(finalMNote);
-                    dialog_fullScreen.setCancelable(false);
-                    dialog_fullScreen.show(getSupportFragmentManager(), "Editar");
-                   /* Dialog_FullScreen dialog_fullScreen = new Dialog_FullScreen();
+            mButtonEditarNota.setOnClickListener(v -> {
+                Dialog_FullScreen dialog_fullScreen = Dialog_FullScreen.newInstance(finalMNote);
+                dialog_fullScreen.setCancelable(false);
+                dialog_fullScreen.show(getSupportFragmentManager(), "Editar");
+               /* Dialog_FullScreen dialog_fullScreen = new Dialog_FullScreen();
 
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    dialog_fullScreen.show(ft, dialog_fullScreen.TAG);*/
-                }
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                dialog_fullScreen.show(ft, dialog_fullScreen.TAG);*/
             });
 
-            mButtonElimnarNota.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ShowActivity.this);
+            mButtonElimnarNota.setOnClickListener(v -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ShowActivity.this);
 
-                    builder.setTitle("Confirmar");
-                    builder.setMessage("Esta seguro de eliminar esta nota?");
+                builder.setTitle("Confirmar");
+                builder.setMessage("Esta seguro de eliminar esta nota?");
 
-                    builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
 
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Do nothing but close the dialog
-                            db = FirebaseFirestore.getInstance();
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Do nothing but close the dialog
+                        db = FirebaseFirestore.getInstance();
 
-                            DocumentReference noteRef = db
-                                    .collection(NODO_CURSOS)
-                                    .document(curso_id)
-                                    .collection(NODO_NOTAS)
-                                    .document(finalMNote.getIdNota());
+                        DocumentReference noteRef = db
+                                .collection(NODO_CURSOS)
+                                .document(curso_id)
+                                .collection(NODO_NOTAS)
+                                .document(finalMNote.getIdNota());
 
-                            noteRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(ShowActivity.this, "Nota Eliminada", Toast.LENGTH_SHORT).show();
-                                        //mNoteRecyclerViewAdapter.removeNote(note);
-                                    } else {
-                                        Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                                    }
+                        noteRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(ShowActivity.this, "Nota Eliminada", Toast.LENGTH_SHORT).show();
+                                    //mNoteRecyclerViewAdapter.removeNote(note);
+                                } else {
+                                    Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
                                 }
-                            });
-                            dialog.dismiss();
-                            ShowActivity.this.finish();
-                        }
-                    });
+                            }
+                        });
+                        dialog.dismiss();
+                        ShowActivity.this.finish();
+                    }
+                });
 
-                    builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
 
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-                            // Do nothing
-                            dialog.dismiss();
-                        }
-                    });
+                        // Do nothing
+                        dialog.dismiss();
+                    }
+                });
 
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                }
+                AlertDialog alert = builder.create();
+                alert.show();
             });
 
-            mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(ShowActivity.this, "Ups. Esta opcion esta en desarrollo", Toast.LENGTH_SHORT).show();
-                }
-            });
+            mFloatingActionButton.setOnClickListener(v -> Toast.makeText(ShowActivity.this, "Ups. Esta opcion esta en desarrollo", Toast.LENGTH_SHORT).show());
 
-            mImageButtonArchivo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent galeriaIntent = new Intent();
-                    galeriaIntent.setAction(Intent.ACTION_GET_CONTENT);
-                    galeriaIntent.setType("image/*");
-                    startActivityForResult(galeriaIntent, GalleriaPick);
-                }
+            mImageButtonArchivo.setOnClickListener(v -> {
+                Intent galeriaIntent = new Intent();
+                galeriaIntent.setAction(Intent.ACTION_GET_CONTENT);
+                galeriaIntent.setType("image/*");
+                startActivityForResult(galeriaIntent, GalleriaPick);
             });
 
             mTextViewDescripcion.setText(mNote.getDescripcionNota());
@@ -305,17 +284,14 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
                 .apply(options)
                 .into(imagenPreview);
 
-        aceptar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Todo: obtenemos los valores de las vistas corresponidnetes
-                String nombre = mEditTextTitulo.getText().toString();
+        aceptar.setOnClickListener(v -> {
+            //Todo: obtenemos los valores de las vistas corresponidnetes
+            String nombre = mEditTextTitulo.getText().toString();
 
-                if (checkInputs(nombre)) {
-                    saveNuevoArchivo(nombre, mImageUri);
-                    //crearNuevoAlumno(nombre, apellidos, edad);
-                    epicDialog.dismiss();
-                }
+            if (checkInputs(nombre)) {
+                saveNuevoArchivo(nombre, mImageUri);
+                //crearNuevoAlumno(nombre, apellidos, edad);
+                epicDialog.dismiss();
             }
         });
 
@@ -333,11 +309,42 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
     }
 
     private void saveNuevoArchivo(final String nombre, Uri mImageUri) {
-        StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ "acpu" + firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
+        final StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ "acpu" + firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
 
-        fileReference.putFile(this.mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        Task<Uri> urlTask = fileReference.putFile(this.mImageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+                // Continue with the task to get the download URL
+                return fileReference.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                    url_imagen = downloadUri.toString();
+
+                    firebaseMethods.nuevoArchivo(
+                            id_nota,
+                            url_imagen,
+                            nombre,
+                            curso_id);
+                } else {
+                    // Handle failures
+                    // ...
+                }
+            }
+        });
+
+
+        /*fileReference.putFile(this.mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                url_imagen = fileReference.getDownloadUrl();
                 url_imagen = taskSnapshot.getDownloadUrl().toString();
                 firebaseMethods.nuevoArchivo(
                         id_nota,
@@ -357,7 +364,7 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
 
                 System.out.println("Upload is " + progress + "% done");
             }
-        });
+        });*/
     }
 
     //Este metodo inicia el recycler view con sus componentes

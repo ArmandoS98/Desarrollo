@@ -2,10 +2,7 @@ package com.santos.dev.Adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.view.ActionMode;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +14,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.santos.dev.Interfaz.IMainMaestro;
-import com.santos.dev.Models.Notas;
+import com.santos.firebasecomponents.Models.Notas;
 import com.santos.dev.R;
 
 import java.text.SimpleDateFormat;

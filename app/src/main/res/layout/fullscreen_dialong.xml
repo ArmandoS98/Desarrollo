@@ -21,68 +21,99 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <RelativeLayout
-            android:layout_margin="7dp"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.design.widget.TextInputLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/title_wrapper"
-                android:layout_marginTop="10dp">
+                android:orientation="vertical">
 
-                <android.support.design.widget.TextInputEditText
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:id="@+id/et_titulo"
-                    android:imeOptions="actionNext"
-                    android:hint="TITULO"
-                    android:textColor="@android:color/black"/>
+                    android:layout_height="match_parent"
+                    android:layout_margin="7dp">
 
-            </android.support.design.widget.TextInputLayout>
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/title_wrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_below="@+id/title_wrapper"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/content_wrapper"
-                android:layout_marginTop="10dp">
+                        android:textColorHint="@color/colorAccent">
 
-                <android.support.design.widget.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/et_descripcion"
-                    android:imeOptions="actionNext"
-                    android:lines="5"
-                    android:textColor="@android:color/black"
-                    android:hint="DESCIPCION"/>
+                        <android.support.design.widget.TextInputEditText
+                            android:id="@+id/et_titulo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="TITULO"
+                            android:imeOptions="actionNext"
+                            android:inputType="textCapWords"
+                            android:textColor="@android:color/black" />
 
-            </android.support.design.widget.TextInputLayout>
+                    </android.support.design.widget.TextInputLayout>
 
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/content_wrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/title_wrapper"
+                        android:layout_marginTop="10dp"
+                        android:textColorHint="@color/colorAccent">
 
-            <RelativeLayout
-                android:layout_below="@+id/content_wrapper"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"
-                >
+                        <android.support.design.widget.TextInputEditText
+                            android:id="@+id/et_descripcion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="DESCIPCION"
+                            android:imeOptions="actionNext"
+                            android:lines="5"
+                            android:textColor="@android:color/black" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/linkBlue"
-                    android:textSize="15sp"
-                    android:text="GUARDAR"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginRight="10dp"
-                    android:id="@+id/save"/>
+                    </android.support.design.widget.TextInputLayout>
 
 
-            </RelativeLayout>
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/content_wrapper"
+                        android:layout_marginTop="10dp">
 
-        </RelativeLayout>
+                        <TextView
+                            android:id="@+id/tv_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Toca la imagen para cambiarla"
+                            android:textColor="@android:color/black"
+                            android:textSize="16sp" />
 
+                        <ImageView
+                            android:id="@+id/img_preview"
+                            android:layout_width="match_parent"
+                            android:layout_height="220dp"
+                            android:layout_below="@+id/tv_info"
+                            android:layout_marginTop="5dp" />
+
+                        <TextView
+                            android:id="@+id/save"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/img_preview"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginTop="25dp"
+                            android:layout_marginRight="10dp"
+                            android:text="GUARDAR CAMBIOS"
+                            android:textColor="@color/linkBlue"
+                            android:textSize="15sp"
+                            android:layout_marginBottom="35dp"/>
+
+
+                    </RelativeLayout>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+        </ScrollView>
     </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>

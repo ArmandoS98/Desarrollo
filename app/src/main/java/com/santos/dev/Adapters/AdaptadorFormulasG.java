@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 
-import com.santos.dev.Models.FormulaG;
+import com.santos.firebasecomponents.Models.FormulaG;
 import com.santos.dev.R;
 
 import java.util.ArrayList;

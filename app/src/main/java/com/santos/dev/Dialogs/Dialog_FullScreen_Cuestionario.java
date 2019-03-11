@@ -15,8 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.santos.dev.Interfaz.IMainMaestro;
-import com.santos.dev.Models.Cuestionario;
-import com.santos.dev.Models.Notas;
+import com.santos.firebasecomponents.Models.Cuestionario;
+import com.santos.firebasecomponents.Models.Notas;
 import com.santos.dev.R;
 
 public class Dialog_FullScreen_Cuestionario extends DialogFragment implements View.OnClickListener {
