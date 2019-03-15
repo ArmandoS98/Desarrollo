@@ -105,12 +105,7 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(cursos.getNombre_curso());
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> finish());
         if (cursos != null) {
 
             id_docuento = cursos.getId_curso();
@@ -470,4 +465,8 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         Date date = new Date();
         return dateFormat.format(date);
     }
+
+
+
+
 }
