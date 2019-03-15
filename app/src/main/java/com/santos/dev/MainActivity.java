@@ -33,6 +33,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.santos.dev.Interfaz.IMainMaestro;
 import com.santos.dev.UI.Activities.LoginUActivity;
+import com.santos.dev.UI.HorariosFragment;
 import com.santos.firebasecomponents.Models.Cursos;
 import com.santos.firebasecomponents.Models.Notas;
 import com.santos.dev.UI.Activities.PerfilActivity;
@@ -180,6 +181,8 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_camera) {
             fragmentoGenerico = new CursosFragment();
             //fragmentoGenerico = new FormulasFragment();
+        } else if (id == R.id.horarios) {
+            fragmentoGenerico = new HorariosFragment();
         } else if (id == R.id.nav_gallery) {
             fragmentoGenerico = new ConversionesFragment();
         } else if (id == R.id.nav_slideshow) {

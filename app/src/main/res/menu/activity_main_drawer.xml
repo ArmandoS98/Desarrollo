@@ -8,6 +8,10 @@
         android:icon="@drawable/ic_estudio"
         android:title="Cursos" />
     <item
+        android:id="@+id/horarios"
+        android:icon="@drawable/ic_event_black_24dp"
+        android:title="Horario" />
+    <item
         android:id="@+id/nav_gallery"
         android:icon="@drawable/ic_conversiones"
         android:title="Conversiones" />
