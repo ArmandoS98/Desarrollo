@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -29,6 +30,7 @@ import com.santos.dev.R;
 import com.santos.dev.Utils.BaseActivity;
 import com.santos.firebasecomponents.FirebaseMethods;
 
+import static android.view.View.GONE;
 import static com.santos.firebasecomponents.Nodos.NODO_USUARIOS;
 
 public class LoginUActivity extends BaseActivity implements
@@ -43,6 +45,7 @@ public class LoginUActivity extends BaseActivity implements
     // [END declare_auth]
 
     private GoogleSignInClient mGoogleSignInClient;
+    private LottieAnimationView mLottieAnimationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +53,13 @@ public class LoginUActivity extends BaseActivity implements
         setContentView(R.layout.activity_login_u);
 
         // Button listeners
-        findViewById(R.id.signInButton).setOnClickListener(this);
+        findViewById(R.id.google_signin_button).setOnClickListener(this);
+        mLottieAnimationView = findViewById(R.id.animation_view);
+
+        mLottieAnimationView.setAnimation(R.raw.mine);
+        mLottieAnimationView.setVisibility(GONE);
+
+        //findViewById(R.id.signInButton).setOnClickListener(this);
 
         // [START config_signin]
         // Configure Google Sign In
@@ -101,7 +110,9 @@ public class LoginUActivity extends BaseActivity implements
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         // [START_EXCLUDE silent]
-        showProgressDialog();
+        //showProgressDialog();
+        mLottieAnimationView.setVisibility(View.VISIBLE);
+        mLottieAnimationView.playAnimation();
         // [END_EXCLUDE]
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -122,7 +133,7 @@ public class LoginUActivity extends BaseActivity implements
                     }
 
                     // [START_EXCLUDE]
-                    hideProgressDialog();
+                    //hideProgressDialog();
                     // [END_EXCLUDE]
                 });
     }
@@ -161,6 +172,8 @@ public class LoginUActivity extends BaseActivity implements
         hideProgressDialog();
         if (user != null) {
             //Logeado con exito
+            mLottieAnimationView.cancelAnimation();
+            mLottieAnimationView.setVisibility(GONE);
             startActivity(new Intent(LoginUActivity.this, MainActivity.class));
             finish();
         } else {
@@ -171,7 +184,7 @@ public class LoginUActivity extends BaseActivity implements
     @Override
     public void onClick(View v) {
         int i = v.getId();
-        if (i == R.id.signInButton) {
+        if (i == R.id.google_signin_button) {
             signIn();
         }
     }

@@ -23,30 +23,31 @@
         completions."
     </string>
 
-    <string name="subject">Subject</string>
-    <string name="time_error">Time field can not be empty!</string>
-    <string name="field_error">field can not be empty!</string>
+    <string name="subject">Curso</string>
+    <string name="time_error">¡El campo de tiempo no puede estar vacío!</string>
+    <string name="field_error">¡El campo no puede estar vacío!</string>
     <string name="title_activity_perfil">PerfilActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="loading">Loading¦</string>
 
-    <string name="add_subject">Add subject</string>
+    <string name="add_subject">Nuevo Curso</string>
     <string name="edit_subject">Edit subject</string>
-    <string name="teacher">Teacher</string>
-    <string name="room">Room</string>
+    <string name="teacher">Catedratico</string>
+    <string name="room">Salon</string>
     <string name="time">Time</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
-    <string name="time_to_dialog">To:</string>
-    <string name="time_from_dialog">From:</string>
-    <string name="subject_dialog">Subject:</string>
-    <string name="teacher_dialog">Teacher:</string>
-    <string name="room_dialog">Room:</string>
-    <string name="select_time">Select time</string>
+    <string name="time_to_dialog">A:</string>
+    <string name="time_from_dialog">De:</string>
+    <string name="subject_dialog">Curso:</string>
+    <string name="teacher_dialog">Catedratico:</string>
+    <string name="room_dialog">Salon:</string>
+    <string name="select_time">Seleccionar</string>
     <string name="select_color">Select color</string>
-    <string name="choose_time">Choose time</string>
+    <string name="choose_time">Elige el tiempo</string>
     <string name="choose_date">Choose date</string>
     <string name="choose_color">Choose color</string>
+    <string name="googlelogin">Google Login</string>
 
 </resources>

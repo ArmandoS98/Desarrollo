@@ -1,8 +1,6 @@
 package com.santos.dev;
 
-import android.app.Dialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -21,13 +19,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.facebook.stetho.Stetho;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -41,7 +39,6 @@ import com.santos.dev.UI.Activities.TabActivity;
 import com.santos.dev.UI.ConversionesFragment;
 import com.santos.dev.UI.Activities.NuevoCursooActivity;
 import com.santos.dev.UI.CursosFragment;
-import com.santos.firebasecomponents.FirebaseMethods;
 
 import java.util.List;
 
@@ -54,16 +51,10 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
     public static final String KEY_NOTAS = "Valor";
     private Fragment fragmentoGenerico = null;
-    //FirebaseMethods
-    private FirebaseMethods firebaseMethods;
-    private Dialog epicDialog;
 
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     private GoogleApiClient mGoogleApiClient;
     private FirebaseUser firebaseUser;
-    private FirebaseFirestore db;
-    private Uri mImageUri;
     private StorageReference mStorageReference;
 
 
@@ -73,6 +64,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        Stetho.initializeWithDefaults(this);
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -148,6 +140,16 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void showHome() {
+        fragmentoGenerico = new CursosFragment();
+        if (fragmentoGenerico != null) {
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);// Colocas el id de tu NavigationView
+            setTitle(navigationView.getMenu().getItem(0).getTitle());
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(R.id.contenedor, fragmentoGenerico, fragmentoGenerico.getTag()).commit();
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -208,16 +210,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void showHome() {
-        fragmentoGenerico = new CursosFragment();
-        if (fragmentoGenerico != null) {
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);// Colocas el id de tu NavigationView
-            setTitle(navigationView.getMenu().getItem(0).getTitle());
-            FragmentManager manager = getSupportFragmentManager();
-            manager.beginTransaction().replace(R.id.contenedor, fragmentoGenerico, fragmentoGenerico.getTag()).commit();
-        }
-    }
-
     @Override
     public void onNotaSeleccionada(Notas notas) {
 
@@ -275,16 +267,12 @@ public class MainActivity extends AppCompatActivity
             UploadTask task = tasks.get(0);
 
             // Add new listeners to the task using an Activity scope
-            task.addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot state) {
-                    Toast.makeText(MainActivity.this, "Subida correcta!", Toast.LENGTH_SHORT).show();
-                }
-            });
+            task.addOnSuccessListener(this, state -> Toast.makeText(MainActivity.this, "Subida correcta!", Toast.LENGTH_SHORT).show());
         }
 
     }
 
+    //Open Whatsapp
     private void openWhatsApp() {
         try {
             String smsNumber = "50253266952"; // E164 format without '+' sign

@@ -152,15 +152,13 @@ public class FirebaseMethods {
         nota.setUserPhoto(datos[4]);
         nota.setUserEmail(datos[5]);
         nota.setId_user_settings(datos[7]);
+        nota.setId_curso(datos[8]);
 
-        newNoteRef.set(nota).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(mContext, "Nota Creada", Toast.LENGTH_SHORT).show();
-                } else
-                    Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
-            }
+        newNoteRef.set(nota).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(mContext, "Nota Creada", Toast.LENGTH_SHORT).show();
+            } else
+                Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -169,22 +167,24 @@ public class FirebaseMethods {
         //datos(1) = id de la tarea
         //datos(2) = pregunta
         //datos(3) = respuesta
-        newNoteRef = db.collection(NODO_CURSOS).document(datos[0]).collection(NODO_NOTAS).document(datos[1]).collection(NODO_CUESTIONARIO).document();
+        newNoteRef = db.collection(NODO_CURSOS)
+                .document(datos[0])
+                .collection(NODO_NOTAS)
+                .document(datos[1])
+                .collection(NODO_CUESTIONARIO).document();
 
         Cuestionario cuestionario = new Cuestionario();
         cuestionario.setId_cuestionario(newNoteRef.getId());
         cuestionario.setId_nota(datos[1]);
         cuestionario.setPregunta(datos[2]);
         cuestionario.setRespuesta_txt(datos[3]);
+        cuestionario.setId_curso(datos[0]);
 
-        newNoteRef.set(cuestionario).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(mContext, "Cuestionario Creado", Toast.LENGTH_SHORT).show();
-                } else
-                    Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
-            }
+        newNoteRef.set(cuestionario).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(mContext, "Cuestionario Creado", Toast.LENGTH_SHORT).show();
+            } else
+                Toast.makeText(mContext, "Error al crear la njota", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -270,6 +270,11 @@ public class FirebaseMethods {
             }
         });
         //return encontrado;
+    }
+
+    //TODO: ELIMINACIO
+    public void deleteCurso(){
+
     }
 
     /*public void addNewMaestro(final String correo, String colegio_ID, String nombres, String apellidos, String edad, String DPI, String telefono, final String grado_asignado) {

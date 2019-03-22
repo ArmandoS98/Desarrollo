@@ -136,12 +136,7 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
             CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
             collapsingToolbar.setTitle(nombre_nota);
 
-            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    finish();
-                }
-            });
+            toolbar.setNavigationOnClickListener(v -> finish());
             loadBackdrop(mNote.getUrl_foto());
 
             mTextViewDescripcion = findViewById(R.id.tv_descripcion_show);
@@ -193,42 +188,32 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
                 builder.setTitle("Confirmar");
                 builder.setMessage("Esta seguro de eliminar esta nota?");
 
-                builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("SI", (dialog, which) -> {
+                    // Do nothing but close the dialog
+                    db = FirebaseFirestore.getInstance();
 
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Do nothing but close the dialog
-                        db = FirebaseFirestore.getInstance();
+                    DocumentReference noteRef = db
+                            .collection(NODO_CURSOS)
+                            .document(curso_id)
+                            .collection(NODO_NOTAS)
+                            .document(finalMNote.getIdNota());
 
-                        DocumentReference noteRef = db
-                                .collection(NODO_CURSOS)
-                                .document(curso_id)
-                                .collection(NODO_NOTAS)
-                                .document(finalMNote.getIdNota());
-
-                        noteRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(ShowActivity.this, "Nota Eliminada", Toast.LENGTH_SHORT).show();
-                                    //mNoteRecyclerViewAdapter.removeNote(note);
-                                } else {
-                                    Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
-                        dialog.dismiss();
-                        ShowActivity.this.finish();
-                    }
+                    noteRef.delete().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(ShowActivity.this, "Nota Eliminada", Toast.LENGTH_SHORT).show();
+                            //mNoteRecyclerViewAdapter.removeNote(note);
+                        } else {
+                            Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    dialog.dismiss();
+                    ShowActivity.this.finish();
                 });
 
-                builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton("NO", (dialog, which) -> {
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        // Do nothing
-                        dialog.dismiss();
-                    }
+                    // Do nothing
+                    dialog.dismiss();
                 });
 
                 AlertDialog alert = builder.create();
@@ -263,12 +248,7 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
         final Button aceptar = epicDialog.findViewById(R.id.btn_acept);
         final EditText mEditTextTitulo = epicDialog.findViewById(R.id.note_title);
 
-        closePopupPositiveImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                epicDialog.dismiss();
-            }
-        });
+        closePopupPositiveImg.setOnClickListener(v -> epicDialog.dismiss());
 
         mStorageReference = FirebaseStorage.getInstance().getReference("Imagenes");
 
@@ -311,32 +291,26 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
     private void saveNuevoArchivo(final String nombre, Uri mImageUri) {
         final StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ "acpu" + firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
 
-        Task<Uri> urlTask = fileReference.putFile(this.mImageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-
-                // Continue with the task to get the download URL
-                return fileReference.getDownloadUrl();
+        Task<Uri> urlTask = fileReference.putFile(this.mImageUri).continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw task.getException();
             }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    Uri downloadUri = task.getResult();
-                    url_imagen = downloadUri.toString();
 
-                    firebaseMethods.nuevoArchivo(
-                            id_nota,
-                            url_imagen,
-                            nombre,
-                            curso_id);
-                } else {
-                    // Handle failures
-                    // ...
-                }
+            // Continue with the task to get the download URL
+            return fileReference.getDownloadUrl();
+        }).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Uri downloadUri = task.getResult();
+                url_imagen = downloadUri.toString();
+
+                firebaseMethods.nuevoArchivo(
+                        id_nota,
+                        url_imagen,
+                        nombre,
+                        curso_id);
+            } else {
+                // Handle failures
+                // ...
             }
         });
 
@@ -406,29 +380,26 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
         }
 
 
-        notesQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
+        notesQuery.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
 
-                    cuestionarios.clear();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Cuestionario _cuestionario = document.toObject(Cuestionario.class);
-                        cuestionarios.add(_cuestionario);
-                    }
-
-                    if (cuestionarios.size() == 0) {
-                        //mTextViewNoDatos.setVisibility(View.VISIBLE);
-                    }
-
-                    if (task.getResult().size() != 0) {
-                        mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
-                    }
-
-                    mAdaptadorCuestionario.notifyDataSetChanged();
-                } else {
-                    Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                cuestionarios.clear();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Cuestionario _cuestionario = document.toObject(Cuestionario.class);
+                    cuestionarios.add(_cuestionario);
                 }
+
+                if (cuestionarios.size() == 0) {
+                    //mTextViewNoDatos.setVisibility(View.VISIBLE);
+                }
+
+                if (task.getResult().size() != 0) {
+                    mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
+                }
+
+                mAdaptadorCuestionario.notifyDataSetChanged();
+            } else {
+                Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -455,30 +426,27 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
         }
 
 
-        notesQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
+        notesQuery.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
 
-                    archivosAgregados.clear();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        ArchivosAniadidos archivosAniadidos = document.toObject(ArchivosAniadidos.class);
-                        archivosAgregados.add(archivosAniadidos);
-                    }
-
-                    if (archivosAgregados.size() == 0) {
-                        //mTextViewNoDatos.setVisibility(View.VISIBLE);
-                        Toast.makeText(ShowActivity.this, "No hay ningun archivo!", Toast.LENGTH_SHORT).show();
-                    }
-
-                    if (task.getResult().size() != 0) {
-                        mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
-                    }
-
-                    mAdapterArchivosAdicionales.notifyDataSetChanged();
-                } else {
-                    Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                archivosAgregados.clear();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    ArchivosAniadidos archivosAniadidos = document.toObject(ArchivosAniadidos.class);
+                    archivosAgregados.add(archivosAniadidos);
                 }
+
+                if (archivosAgregados.size() == 0) {
+                    //mTextViewNoDatos.setVisibility(View.VISIBLE);
+                    Toast.makeText(ShowActivity.this, "No hay ningun archivo!", Toast.LENGTH_SHORT).show();
+                }
+
+                if (task.getResult().size() != 0) {
+                    mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
+                }
+
+                mAdapterArchivosAdicionales.notifyDataSetChanged();
+            } else {
+                Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -499,14 +467,11 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
         DocumentReference noteref = db.collection(NODO_CURSOS).document(curso_id).collection(NODO_NOTAS).document(notas.getIdNota());
         noteref.update(TITULO_NOTA, notas.getTituloNota(),
                 CONTENIDO_NOTA, notas.getDescripcionNota()
-        ).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(ShowActivity.this, "Informacion Actualizada", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                }
+        ).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(ShowActivity.this, "Informacion Actualizada", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(ShowActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -531,30 +496,26 @@ public class ShowActivity extends AppCompatActivity implements IMainMaestro {
 
     private void getUpdateCuestionarioRefresh() {
         db.collection(NODO_CURSOS).document(curso_id).collection(NODO_NOTAS).document(id_nota).collection(NODO_CUESTIONARIO)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value,
-                                        @Nullable FirebaseFirestoreException e) {
-                        if (e != null) {
-                            Log.w(TAG, "Listen failed.", e);
-                            return;
-                        }
-
-                        if (cuestionarios.size() == 0) {
-                            cuestionarios.clear();
-                            for (QueryDocumentSnapshot doc : value) {
-                                Cuestionario cuestionario = doc.toObject(Cuestionario.class);
-                                cuestionarios.add(cuestionario);
-                            }
-                        } else {
-                            cuestionarios.clear();
-                            for (QueryDocumentSnapshot doc : value) {
-                                Cuestionario cuestionario = doc.toObject(Cuestionario.class);
-                                cuestionarios.add(cuestionario);
-                            }
-                        }
-                        mAdaptadorCuestionario.notifyDataSetChanged();
+                .addSnapshotListener((value, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
                     }
+
+                    if (cuestionarios.size() == 0) {
+                        cuestionarios.clear();
+                        for (QueryDocumentSnapshot doc : value) {
+                            Cuestionario cuestionario = doc.toObject(Cuestionario.class);
+                            cuestionarios.add(cuestionario);
+                        }
+                    } else {
+                        cuestionarios.clear();
+                        for (QueryDocumentSnapshot doc : value) {
+                            Cuestionario cuestionario = doc.toObject(Cuestionario.class);
+                            cuestionarios.add(cuestionario);
+                        }
+                    }
+                    mAdaptadorCuestionario.notifyDataSetChanged();
                 });
     }
 

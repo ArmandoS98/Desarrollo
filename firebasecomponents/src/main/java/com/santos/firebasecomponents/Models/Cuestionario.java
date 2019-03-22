@@ -15,16 +15,18 @@ public class Cuestionario implements Parcelable {
     private String pregunta;
     private String respuesta_txt;
     private @ServerTimestamp Date timestamp;
+    private String id_curso;
 
     public Cuestionario() {
     }
 
-    public Cuestionario(String id_cuestionario, String id_nota, String pregunta, String respuesta_txt, Date timestamp) {
+    public Cuestionario(String id_cuestionario, String id_nota, String pregunta, String respuesta_txt, Date timestamp, String id_curso) {
         this.id_cuestionario = id_cuestionario;
         this.id_nota = id_nota;
         this.pregunta = pregunta;
         this.respuesta_txt = respuesta_txt;
         this.timestamp = timestamp;
+        this.id_curso = id_curso;
     }
 
     protected Cuestionario(Parcel in) {
@@ -32,8 +34,8 @@ public class Cuestionario implements Parcelable {
         id_nota = in.readString();
         pregunta = in.readString();
         respuesta_txt = in.readString();
+        id_curso = in.readString();
     }
-
 
     public static final Creator<Cuestionario> CREATOR = new Creator<Cuestionario>() {
         @Override
@@ -87,6 +89,14 @@ public class Cuestionario implements Parcelable {
         this.timestamp = timestamp;
     }
 
+    public String getId_curso() {
+        return id_curso;
+    }
+
+    public void setId_curso(String id_curso) {
+        this.id_curso = id_curso;
+    }
+
     @Override
     public String toString() {
         return "Cuestionario{" +
@@ -95,6 +105,7 @@ public class Cuestionario implements Parcelable {
                 ", pregunta='" + pregunta + '\'' +
                 ", respuesta_txt='" + respuesta_txt + '\'' +
                 ", timestamp=" + timestamp +
+                ", id_curso='" + id_curso + '\'' +
                 '}';
     }
 
@@ -109,5 +120,6 @@ public class Cuestionario implements Parcelable {
         dest.writeString(id_nota);
         dest.writeString(pregunta);
         dest.writeString(respuesta_txt);
+        dest.writeString(id_curso);
     }
 }

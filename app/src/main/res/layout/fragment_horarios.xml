@@ -10,7 +10,6 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="3dp"
         android:clipToPadding="false"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:layout_anchorGravity="top|center"
@@ -39,6 +38,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_feedback" />
+        app:srcCompat="@drawable/ic_add_black_24dp" />
 
 </RelativeLayout>

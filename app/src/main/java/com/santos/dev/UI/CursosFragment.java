@@ -4,6 +4,7 @@ package com.santos.dev.UI;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -22,6 +23,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -45,7 +47,6 @@ public class CursosFragment extends Fragment {
 
     //Variables
     private DocumentSnapshot mLastQueriedDocument;
-    private FirebaseMethods firebaseMethods;
     private RotateLoading mRotateLoading;
     private AdaptadorCursos mAdaptadorNotas;
     private FirebaseAuth mAuth;
@@ -83,7 +84,13 @@ public class CursosFragment extends Fragment {
     }
 
     private void getAlumnos() {
+       /* FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();*/
+
         db = FirebaseFirestore.getInstance();
+        //db.setFirestoreSettings(settings);
+
 
         notesCollectionRef = db.collection(NODO_CURSOS);
 
@@ -101,29 +108,26 @@ public class CursosFragment extends Fragment {
         }
 
 
-        notesQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    mCursos.clear();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Cursos cursos = document.toObject(Cursos.class);
-                        mCursos.add(cursos);
-                    }
-
-                    if (mCursos.size() == 0) {
-                        //   mTextViewNoDatos.setVisibility(View.VISIBLE);
-                    }
-
-                    if (task.getResult().size() != 0) {
-                        mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
-                    }
-
-                    mRotateLoading.stop();
-                    mAdaptadorNotas.notifyDataSetChanged();
-                } else {
-                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+        notesQuery.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                mCursos.clear();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Cursos cursos = document.toObject(Cursos.class);
+                    mCursos.add(cursos);
                 }
+
+                if (mCursos.size() == 0) {
+                    //   mTextViewNoDatos.setVisibility(View.VISIBLE);
+                }
+
+                if (task.getResult().size() != 0) {
+                    mLastQueriedDocument = task.getResult().getDocuments().get(task.getResult().size() - 1);
+                }
+
+                mRotateLoading.stop();
+                mAdaptadorNotas.notifyDataSetChanged();
+            } else {
+                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -135,8 +139,8 @@ public class CursosFragment extends Fragment {
             mAdaptadorNotas = new AdaptadorCursos(getContext(), mCursos);
         }
 
-        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayout.VERTICAL);
-        mRecyclerViewConverciones.setLayoutManager(layoutManager);
+        //StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayout.VERTICAL);
+        mRecyclerViewConverciones.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerViewConverciones.setAdapter(mAdaptadorNotas);
     }
 

@@ -109,10 +109,10 @@
                                 android:text="Archivos Relacionados"
                                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
-                         <TextView
-                             android:layout_width="wrap_content"
-                             android:layout_height="wrap_content"
-                             android:text="Hola"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Hola" />
 
                         </LinearLayout>
 

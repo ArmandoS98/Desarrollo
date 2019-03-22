@@ -13,7 +13,8 @@ public class Notas implements Parcelable {
 
     private String tituloNota;
     private String descripcionNota;
-    private @ServerTimestamp Date timestamp;
+    private @ServerTimestamp
+    Date timestamp;
     private String nombreTemaNota;
     private String url_foto;
     private String idNota;
@@ -22,11 +23,12 @@ public class Notas implements Parcelable {
     private String userPhoto;
     private String userEmail;
     private String id_user_settings;
+    private String id_curso;
 
     public Notas() {
     }
 
-    public Notas(String tituloNota, String descripcionNota, Date timestamp, String nombreTemaNota, String url_foto, String idNota, String key, String userName, String userPhoto, String userEmail, String id_user_settings) {
+    public Notas(String tituloNota, String descripcionNota, Date timestamp, String nombreTemaNota, String url_foto, String idNota, String key, String userName, String userPhoto, String userEmail, String id_user_settings, String id_curso) {
         this.tituloNota = tituloNota;
         this.descripcionNota = descripcionNota;
         this.timestamp = timestamp;
@@ -38,6 +40,7 @@ public class Notas implements Parcelable {
         this.userPhoto = userPhoto;
         this.userEmail = userEmail;
         this.id_user_settings = id_user_settings;
+        this.id_curso = id_curso;
     }
 
     protected Notas(Parcel in) {
@@ -51,6 +54,7 @@ public class Notas implements Parcelable {
         userPhoto = in.readString();
         userEmail = in.readString();
         id_user_settings = in.readString();
+        id_curso = in.readString();
     }
 
     public static final Creator<Notas> CREATOR = new Creator<Notas>() {
@@ -153,6 +157,32 @@ public class Notas implements Parcelable {
         this.id_user_settings = id_user_settings;
     }
 
+    public String getId_curso() {
+        return id_curso;
+    }
+
+    public void setId_curso(String id_curso) {
+        this.id_curso = id_curso;
+    }
+
+    @Override
+    public String toString() {
+        return "Notas{" +
+                "tituloNota='" + tituloNota + '\'' +
+                ", descripcionNota='" + descripcionNota + '\'' +
+                ", timestamp=" + timestamp +
+                ", nombreTemaNota='" + nombreTemaNota + '\'' +
+                ", url_foto='" + url_foto + '\'' +
+                ", idNota='" + idNota + '\'' +
+                ", key='" + key + '\'' +
+                ", userName='" + userName + '\'' +
+                ", userPhoto='" + userPhoto + '\'' +
+                ", userEmail='" + userEmail + '\'' +
+                ", id_user_settings='" + id_user_settings + '\'' +
+                ", id_curso='" + id_curso + '\'' +
+                '}';
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -170,22 +200,6 @@ public class Notas implements Parcelable {
         dest.writeString(userPhoto);
         dest.writeString(userEmail);
         dest.writeString(id_user_settings);
-    }
-
-    @Override
-    public String toString() {
-        return "Notas{" +
-                "tituloNota='" + tituloNota + '\'' +
-                ", descripcionNota='" + descripcionNota + '\'' +
-                ", timestamp=" + timestamp +
-                ", nombreTemaNota='" + nombreTemaNota + '\'' +
-                ", url_foto='" + url_foto + '\'' +
-                ", idNota='" + idNota + '\'' +
-                ", key='" + key + '\'' +
-                ", userName='" + userName + '\'' +
-                ", userPhoto='" + userPhoto + '\'' +
-                ", userEmail='" + userEmail + '\'' +
-                ", id_user_settings='" + id_user_settings + '\'' +
-                '}';
+        dest.writeString(id_curso);
     }
 }

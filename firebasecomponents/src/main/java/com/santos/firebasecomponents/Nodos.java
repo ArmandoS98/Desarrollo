@@ -8,6 +8,9 @@ public class Nodos {
     public static final String NODO_CUESTIONARIO = "Cuestionario";
     public static final String NODO_IMAGENES_ANIADIDAS = "Archivos";
 
+    //Localizacion de las Imagenes
+    public static final String IMAGENES_FOLDER = "Imagenes";
+
     //Sub-Collections
     public static final String SUB_COLLECTION_CURSOS = "Cursos";
 

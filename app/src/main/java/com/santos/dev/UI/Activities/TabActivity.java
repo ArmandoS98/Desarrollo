@@ -3,6 +3,7 @@ package com.santos.dev.UI.Activities;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -32,6 +33,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.common.primitives.Bytes;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -46,17 +48,24 @@ import com.santos.dev.R;
 import com.santos.dev.UI.CompartidosFragment;
 import com.santos.dev.UI.FormulasFragment;
 import com.santos.firebasecomponents.FirebaseMethods;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import id.zelory.compressor.Compressor;
 import yuku.ambilwarna.AmbilWarnaDialog;
 
 import static com.santos.dev.MainActivity.KEY_NOTAS;
 import static com.santos.firebasecomponents.Nodos.KEY;
+import static com.santos.firebasecomponents.Nodos.NODO_CUESTIONARIO;
 import static com.santos.firebasecomponents.Nodos.NODO_CURSOS;
 import static com.santos.firebasecomponents.Nodos.NODO_NOTAS;
 
@@ -75,8 +84,6 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
     //FirebaseMethods
     private FirebaseMethods firebaseMethods;
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    private GoogleApiClient mGoogleApiClient;
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
     private StorageReference mStorageReference;
@@ -86,6 +93,7 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
     private int currentColor;
     private Cursos cursos = null;
     private Uri mImageUri;
+    private Bitmap thumb_bitmap = null;
 
 
     @Override
@@ -101,7 +109,7 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         Intent i = getIntent();
         cursos = i.getParcelableExtra(KEY_NOTAS);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(cursos.getNombre_curso());
 
@@ -114,7 +122,7 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
             viewPager = (ViewPager) findViewById(R.id.htab_viewpager);
             setupViewPager(viewPager);
 
-            TabLayout tabLayout = (TabLayout) findViewById(R.id.htab_tabs);
+            TabLayout tabLayout = findViewById(R.id.htab_tabs);
             tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
             tabLayout.setupWithViewPager(viewPager);
 
@@ -244,7 +252,10 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            showTheNewDialog(R.style.DialogScale);
+            Intent intent = new Intent(TabActivity.this, OptionsActivity.class);
+            intent.putExtra(KEY_NOTAS, id_docuento);
+            startActivity(intent);
+            //showTheNewDialog(R.style.DialogScale);
             //mAdaptadorMaestrosCompleto.notifyDataSetChanged();
             //startActivity(new Intent(getApplicationContext(), NuevoCursooActivity.class));
             //showTheNewDialog(R.style.DialogScale);
@@ -264,30 +275,62 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         builder.setTitle("Confirmar");
         builder.setMessage("Esta seguro de eliminar este curso?");
 
-        builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("SI", (dialog, which) -> {
+            // Do nothing but close the dialog
+            db = FirebaseFirestore.getInstance();
 
-            public void onClick(DialogInterface dialog, int which) {
-                // Do nothing but close the dialog
-                db = FirebaseFirestore.getInstance();
+            //deleteCuestionario();
 
-                DocumentReference noteRef = db
-                        .collection(NODO_CURSOS)
-                        .document(cursos.getId_curso());
+            DocumentReference noteRef = db
+                    .collection(NODO_CURSOS)
+                    .document(cursos.getId_curso());
 
-                noteRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(TabActivity.this, "Curso Eliminado", Toast.LENGTH_SHORT).show();
-                            //mNoteRecyclerViewAdapter.removeNote(note);
-                        } else {
-                            Toast.makeText(TabActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-                dialog.dismiss();
-                TabActivity.this.finish();
-            }
+            noteRef.delete().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(TabActivity.this, "Curso Eliminado", Toast.LENGTH_SHORT).show();
+                    //mNoteRecyclerViewAdapter.removeNote(note);
+                } else {
+                    Toast.makeText(TabActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.dismiss();
+            TabActivity.this.finish();
+        });
+
+        builder.setNegativeButton("NO", (dialog, which) -> {
+
+            // Do nothing
+            dialog.dismiss();
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void deleteNotas() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(TabActivity.this);
+
+        builder.setTitle("Confirmar");
+        builder.setMessage("Esta seguro de eliminar este curso?");
+
+        builder.setPositiveButton("SI", (dialog, which) -> {
+            // Do nothing but close the dialog
+            db = FirebaseFirestore.getInstance();
+
+            DocumentReference noteRef = db
+                    .collection(NODO_CURSOS)
+                    .document(cursos.getId_curso());
+
+            noteRef.delete().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(TabActivity.this, "Curso Eliminado", Toast.LENGTH_SHORT).show();
+                    //mNoteRecyclerViewAdapter.removeNote(note);
+                } else {
+                    Toast.makeText(TabActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.dismiss();
+            TabActivity.this.finish();
         });
 
         builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -302,6 +345,66 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void deleteArchivos() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(TabActivity.this);
+
+        builder.setTitle("Confirmar");
+        builder.setMessage("Esta seguro de eliminar este curso?");
+
+        builder.setPositiveButton("SI", (dialog, which) -> {
+            // Do nothing but close the dialog
+            db = FirebaseFirestore.getInstance();
+
+            DocumentReference noteRef = db
+                    .collection(NODO_CURSOS)
+                    .document(cursos.getId_curso());
+
+            noteRef.delete().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(TabActivity.this, "Curso Eliminado", Toast.LENGTH_SHORT).show();
+                    //mNoteRecyclerViewAdapter.removeNote(note);
+                } else {
+                    Toast.makeText(TabActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.dismiss();
+            TabActivity.this.finish();
+        });
+
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                // Do nothing
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void deleteCuestionario() {
+        db = FirebaseFirestore.getInstance();
+
+        DocumentReference noteRef = db
+                .collection(NODO_CURSOS)
+                .document(cursos.getId_curso())
+                .collection(NODO_NOTAS)
+                .document();
+
+        noteRef.delete().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(TabActivity.this, "Curso Eliminado", Toast.LENGTH_SHORT).show();
+                //mNoteRecyclerViewAdapter.removeNote(note);
+            } else {
+                Toast.makeText(TabActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        });
+        TabActivity.this.finish();
     }
 
     private void openDialog(boolean supportsAlpha) {
@@ -336,40 +439,29 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         final EditText mEditTextApellidos = epicDialog.findViewById(R.id.tidt_apellido);
         final EditText mEditTextEdad = epicDialog.findViewById(R.id.tiet_edad);
 
-        closePopupPositiveImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                epicDialog.dismiss();
-            }
-        });
+        closePopupPositiveImg.setOnClickListener(v -> epicDialog.dismiss());
 
         mStorageReference = FirebaseStorage.getInstance().getReference("Imagenes");
 
-        mButtonFoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent galeriaIntent = new Intent();
-                galeriaIntent.setAction(Intent.ACTION_GET_CONTENT);
-                galeriaIntent.setType("image/*");
-                startActivityForResult(galeriaIntent, GalleriaPick);
-            }
+        mButtonFoto.setOnClickListener(v -> {
+            Intent galeriaIntent = new Intent();
+            galeriaIntent.setAction(Intent.ACTION_GET_CONTENT);
+            galeriaIntent.setType("image/*");
+            startActivityForResult(galeriaIntent, GalleriaPick);
         });
 
-        aceptar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Todo: obtenemos los valores de las vistas corresponidnetes
-                String nombre = mEditTextTitulo.getText().toString();
-                String apellidos = mEditTextApellidos.getText().toString();
-                String edad = mEditTextEdad.getText().toString();
+        aceptar.setOnClickListener(v -> {
+            //Todo: obtenemos los valores de las vistas corresponidnetes
+            String nombre = mEditTextTitulo.getText().toString();
+            String apellidos = mEditTextApellidos.getText().toString();
+            String edad = mEditTextEdad.getText().toString();
 
-                if (checkInputs(nombre, apellidos, edad)) {
-                    if (url_imagen == null)
-                        url_imagen = FOTO1;
+            if (checkInputs(nombre, apellidos, edad)) {
+                if (url_imagen == null)
+                    url_imagen = FOTO1;
 
-                    crearNuevoAlumno(nombre, apellidos, edad);
-                    epicDialog.dismiss();
-                }
+                crearNuevoAlumno(nombre, apellidos, edad);
+                epicDialog.dismiss();
             }
         });
 
@@ -404,41 +496,66 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GalleriaPick && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
-            mImageUri = data.getData();
+
+        final StorageReference fileReference = mStorageReference.child(firebaseUser.getUid() + getDate() + ".jpg");
+
+        if (requestCode == GalleriaPick && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+            // start picker to get image for cropping and then use the image in cropping activity
+            CropImage.activity(data.getData())
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1, 1)
+                    .start(this);
 
 
-            final StorageReference fileReference = mStorageReference.child(/*System.currentTimeMillis()*/ firebaseUser.getUid() + getDate() + ".jpg" /*+ getFileExtencion(mImageUri)*/);
+            /*mImageUri = data.getData();
 
-            Task<Uri> urlTask = fileReference.putFile(mImageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
+            File thumb_file_path = new File(mImageUri.getPath());
+            thumb_file_path.getAbsolutePath();
 
-                    // Continue with the task to get the download URL
-                    return fileReference.getDownloadUrl();
+            Bitmap thumb_bitmap = null;
+            try {
+                thumb_bitmap = new Compressor(this)
+                        .setMaxWidth(200)
+                        .setMaxHeight(200)
+                        .setQuality(75)
+                        .compressToBitmap(thumb_file_path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            thumb_bitmap.compress(Bitmap.CompressFormat.JPEG, 2, byteArrayOutputStream);
+            final byte[] thumb_byte = byteArrayOutputStream.toByteArray();
+
+            UploadTask uploadTask = fileReference.putBytes(thumb_byte);
+            uploadTask.addOnCompleteListener(task -> {
+                String url = fileReference.getDownloadUrl().toString();
+                Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
+            });*/
+//---------------------------------------------------------------------------------------------------------------------
+            /*Task<Uri> urlTask = fileReference.putFile(mImageUri).continueWithTask(task -> {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
                 }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downloadUri = task.getResult();
-                        url_imagen = downloadUri.toString();
-                    } else {
-                        // Handle failures
-                        // ...
-                    }
-                }
-            });
 
-            if (urlTask != null) {
+                // Continue with the task to get the download URL
+                return fileReference.getDownloadUrl();
+            }).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                    url_imagen = downloadUri.toString();
+                } else {
+                    // Handle failures
+                    // ...
+                }
+            });*/
+
+            /*if (urlTask != null) {
                 Toast.makeText(this, "Subido", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-            }
+            }*/
           /*  fileReference.putFile(mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -458,6 +575,67 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
                 }
             });*/
         }
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+
+            if (resultCode == RESULT_OK) {
+                mImageUri = result.getUri();
+                File thumb_file_path = new File(mImageUri.getPath());
+                thumb_file_path.getAbsolutePath();
+
+                try {
+                    thumb_bitmap = new Compressor(this)
+                            .setQuality(75)
+                            .compressToBitmap(thumb_file_path);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                thumb_bitmap.compress(Bitmap.CompressFormat.JPEG, 75, byteArrayOutputStream);
+                final byte[] thumb_byte = byteArrayOutputStream.toByteArray();
+
+                Task<Uri> uriTask = fileReference.putBytes(thumb_byte).continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    // Continue with the task to get the download URL
+                    return fileReference.getDownloadUrl();
+                }).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        url_imagen = downloadUri.toString();
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
+                });
+
+                if (uriTask != null) {
+                    Toast.makeText(this, "Subido", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+                }
+                /*UploadTask uploadTask = fileReference.putBytes(thumb_byte);
+
+                uploadTask.addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        url_imagen = fileReference.getDownloadUrl().toString();
+                    }
+                    url_imagen = fileReference.getDownloadUrl().toString();
+
+                    /*String url = fileReference.getDownloadUrl().toString();
+                    UploadTask.TaskSnapshot downloadUri = task.getResult();
+                    url_imagen = downloadUri.toString();*/
+                   /* Toast.makeText(this, url_imagen, Toast.LENGTH_SHORT).show();
+                });*/
+            }
+
+        }
+
     }
 
     private String getDate() {
@@ -465,8 +643,6 @@ public class TabActivity extends AppCompatActivity implements IMainMaestro {
         Date date = new Date();
         return dateFormat.format(date);
     }
-
-
 
 
 }
